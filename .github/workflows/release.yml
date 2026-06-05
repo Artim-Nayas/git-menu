@@ -32,3 +32,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      # Auto-fill a "What's Changed" changelog from the commits since the last tag,
+      # so every release is labelled (our commits are prefixed feat:/fix:/perf:/docs:).
+      - name: Generate release notes
+        run: gh release edit "${GITHUB_REF_NAME}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
