@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import util from 'util';
 import { classifyGhFailure } from './lib/gh-errors.js';
+import { filterInbox, normalizeNotification } from './lib/notifications.js';
 
 const execFilePromise = util.promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +22,8 @@ const ghEnv = { ...process.env, PATH: `${process.env.PATH}:/opt/homebrew/bin:/us
 async function runGH(command, args) {
   try {
     const { stdout } = await execFilePromise(command, args, { env: ghEnv });
-    return { ok: true, data: JSON.parse(stdout) };
+    // mark-read style endpoints return 205 with an empty body — treat as success/no data.
+    return { ok: true, data: stdout && stdout.trim() ? JSON.parse(stdout) : null };
   } catch (error) {
     const kind = classifyGhFailure({
       code: error.code,
@@ -189,6 +191,26 @@ ipcMain.handle('get-contributed-repos', async () => {
   const res = await runGH('gh', ['api', 'graphql', '-f', `query=${q}`]);
   if (!res.ok) return res;
   return { ok: true, data: res.data?.data?.viewer?.repositoriesContributedTo?.nodes || [] };
+});
+
+ipcMain.handle('get-inbox', async () => {
+  const res = await runGH('gh', ['api', 'notifications', '--paginate']);
+  if (!res.ok) return res;
+  const items = filterInbox(res.data).map(normalizeNotification);
+  return { ok: true, data: items };
+});
+
+ipcMain.handle('mark-read', async (event, id) => {
+  if (!id) return { ok: true };
+  const res = await runGH('gh', ['api', '-X', 'PATCH', `notifications/threads/${id}`]);
+  return res.ok ? { ok: true } : res;
+});
+
+ipcMain.handle('mark-all-read', async (event, ids) => {
+  for (const id of ids || []) {
+    await runGH('gh', ['api', '-X', 'PATCH', `notifications/threads/${id}`]);
+  }
+  return { ok: true };
 });
 
 ipcMain.on('open-external', (event, url) => {
