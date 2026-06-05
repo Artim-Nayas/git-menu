@@ -39,3 +39,6 @@ test('empty / missing calendar is all zeros', () => {
   assert.deepEqual(z, { today: 0, currentStreak: 0, thisWeek: 0, bestDay: 0, thisYear: 0, recentAverage: 0 });
   assert.doesNotThrow(() => computeStats(undefined));
 });
+test('thisYear stays 0 when totalContributions is explicitly 0 (?? not ||)', () => {
+  assert.equal(computeStats(calendarFrom([], 0)).thisYear, 0);
+});
