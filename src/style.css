@@ -689,4 +689,72 @@ body {
 /* Disclosure chevron: right when collapsed, down when expanded (scoped so it
    overrides the global .chevron rotation used by the org/repo accordions). */
 .contrib-toggle .chevron { transform: rotate(-90deg); transition: transform 0.2s ease; }
+
+/* Inbox tab badge */
+.tab-badge {
+  background: #388bfd;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 0 5px;
+  border-radius: 8px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* Inbox list */
+.inbox-list { display: flex; flex-direction: column; }
+.inbox-actions { display: flex; justify-content: flex-end; padding: 6px 12px; }
+.inbox-mark-all {
+  -webkit-app-region: no-drag;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.inbox-mark-all:hover { color: var(--text-primary); background: var(--bg-color-hover); }
+.inbox-group {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 7px 12px 3px;
+}
+.inbox-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 12px;
+  cursor: pointer;
+  border-top: 1px solid var(--border-color);
+}
+.inbox-item:hover { background: var(--bg-color-hover); }
+.inbox-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #388bfd;
+  flex: 0 0 auto;
+}
+.inbox-dot.read { background: transparent; }
+.inbox-body { min-width: 0; flex: 1; }
+.inbox-title {
+  font-size: 12px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inbox-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.inbox-meta span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .contrib-toggle .chevron.open { transform: rotate(0deg); }
