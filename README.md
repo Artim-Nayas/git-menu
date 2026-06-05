@@ -1,11 +1,20 @@
 # Git Menu
 
+[![Release](https://img.shields.io/github/v/release/Artim-Nayas/git-menu?sort=semver)](https://github.com/Artim-Nayas/git-menu/releases/latest)
+[![CI](https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml/badge.svg)](https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/Artim-Nayas/git-menu)](LICENSE)
+![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
+
 A lightweight macOS menu-bar app for your GitHub work — pull requests, review
 requests, a notifications inbox, and your contribution activity — without
 leaving the menu bar. Powered entirely by the [`gh`](https://cli.github.com)
 CLI, so it uses your existing GitHub auth.
 
-> Status: early (`v0.1.0`). macOS (Apple Silicon) only for now.
+> Status: early. macOS (Apple Silicon) only for now.
+
+## Screenshot
+
+<p align="center"><img src="docs/screenshot.png" alt="Git Menu popover" width="380"></p>
 
 ## Install
 

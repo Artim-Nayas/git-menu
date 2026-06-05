@@ -143,12 +143,12 @@ async function checkForUpdateDot() {
 // regardless of the active tab, so the menubar count and inbox tab badge are always live.
 async function updateBadges() {
   try {
-    let reviewCount = 0;
-    let unread = 0;
-    const rev = await window.api.getReviewRequests();
-    if (rev && rev.ok) reviewCount = (rev.data || []).length;
-    const inbox = await window.api.getInbox();
-    if (inbox && inbox.ok) unread = (inbox.data || []).filter((n) => n.unread).length;
+    const [rev, inbox] = await Promise.all([
+      window.api.getReviewRequests(),
+      window.api.getInbox(),
+    ]);
+    const reviewCount = rev && rev.ok ? (rev.data || []).length : 0;
+    const unread = inbox && inbox.ok ? (inbox.data || []).filter((n) => n.unread).length : 0;
     updateInboxBadge(unread);
     window.api.updateTrayCount(settings.smartBadge ? reviewCount + unread : 0);
   } catch (error) {
@@ -171,10 +171,14 @@ async function loadData(isSilent = false) {
       setListMode('inbox');
       renderInbox(inboxRes.data || [], searchQuery);
     } else {
-      // PRs are the primary call — its result gates auth/setup state.
-      const prRes = currentTab === 'review-requests'
-        ? await window.api.getReviewRequests()
-        : await window.api.getMyPRs();
+      // Fetch the primary PR list and (on Mine) contributed repos in PARALLEL, so the
+      // list paints after the slower of the two — not their sum. The PR result still
+      // gates the auth/setup state.
+      const [prRes, crRes] = await Promise.all(
+        currentTab === 'review-requests'
+          ? [window.api.getReviewRequests()]
+          : [window.api.getMyPRs(), window.api.getContributedRepos()]
+      );
 
       if (!prRes || !prRes.ok) {
         handleDataFailure(prRes, isSilent);
@@ -185,26 +189,28 @@ async function loadData(isSilent = false) {
       hideSetup();
       setListMode('prs');
       currentPRs = prRes.data || [];
-
-      // Contributed-to repos (best-effort, Mine tab only) so repos with no open PRs still show.
-      contributedRepos = [];
-      if (currentTab === 'my-prs') {
-        const cr = await window.api.getContributedRepos();
-        if (cr && cr.ok) contributedRepos = cr.data || [];
-      }
+      contributedRepos = crRes && crRes.ok ? (crRes.data || []) : [];
       renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: settings.showEmptyRepos });
     }
 
-    // Contributions are best-effort: never gate the list on them.
-    const contribRes = await window.api.getContributions();
-    renderContributions(contribRes && contribRes.ok ? contribRes.data : null);
-
-    updateBadges();
+    // Secondary data (contributions widget + smart badges) loads in the background —
+    // it never blocks the list's first paint.
+    loadSecondary();
   } catch (error) {
     // IPC-level failure (handler threw) — treat as a generic data failure.
     console.error('loadData failed:', error);
     handleDataFailure({ ok: false, kind: 'api' }, isSilent);
   }
+}
+
+// Background loads: the contributions widget + smart badges, fired after the list
+// paints so they never delay the primary list.
+function loadSecondary() {
+  window.api
+    .getContributions()
+    .then((res) => renderContributions(res && res.ok ? res.data : null))
+    .catch((error) => console.error('contributions failed:', error));
+  updateBadges();
 }
 
 // On a critical failure (gh missing / not signed in), show the Setup screen.
