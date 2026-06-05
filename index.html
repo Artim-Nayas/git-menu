@@ -27,6 +27,14 @@
         <input type="text" id="search-input" class="search-input" placeholder="Search PRs, repos..." />
       </div>
 
+      <div class="filter-bar">
+        <button class="filter-chip on" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="failing">⚠ Failing</button>
+        <button class="filter-chip" data-filter="review">👀 Review</button>
+        <button class="filter-chip" data-filter="approved">✓ Approved</button>
+        <button class="filter-chip" data-filter="draft">Draft</button>
+      </div>
+
       <div id="refresh-error" class="refresh-error hidden">
         <span>Couldn't refresh</span>
         <button id="refresh-error-retry" class="refresh-error-retry">Retry</button>

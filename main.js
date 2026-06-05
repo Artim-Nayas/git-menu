@@ -177,6 +177,20 @@ ipcMain.handle('get-contributions', async () => {
   return { ok: true, data: res.data?.data?.viewer?.contributionsCollection?.contributionCalendar || null };
 });
 
+ipcMain.handle('get-contributed-repos', async () => {
+  const q = `
+  query {
+    viewer {
+      repositoriesContributedTo(first: 100, includeUserRepositories: true, contributionTypes: [COMMIT, PULL_REQUEST, PULL_REQUEST_REVIEW], orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes { nameWithOwner }
+      }
+    }
+  }`;
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${q}`]);
+  if (!res.ok) return res;
+  return { ok: true, data: res.data?.data?.viewer?.repositoriesContributedTo?.nodes || [] };
+});
+
 ipcMain.on('open-external', (event, url) => {
   shell.openExternal(url);
 });
