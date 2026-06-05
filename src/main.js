@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupKeyboardNav();
   await initSettings();
   loadData();
+  checkForUpdateDot();
 });
 
 async function initSettings() {
@@ -124,6 +125,18 @@ function startAutoRefresh(minutes = 5) {
   refreshInterval = setInterval(() => {
     loadData(true);
   }, minutes * 60000);
+}
+
+// Quietly check for a newer release on launch; flag the gear if one exists.
+async function checkForUpdateDot() {
+  try {
+    const res = await window.api.checkUpdate();
+    if (res && res.ok && res.data.available) {
+      document.getElementById('settings-btn').classList.add('has-update');
+    }
+  } catch (error) {
+    console.error('update check failed:', error);
+  }
 }
 
 // Smart badge = review-requested PRs + unread inbox threads. Fetched every refresh

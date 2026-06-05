@@ -850,3 +850,60 @@ body {
   background: rgba(56, 139, 253, 0.16);
   box-shadow: inset 2px 0 0 #388bfd;
 }
+
+/* Self-updater (Settings About) */
+.settings-about { display: flex; flex-direction: column; gap: 6px; }
+.about-version { color: var(--text-secondary); }
+.check-update {
+  -webkit-app-region: no-drag;
+  align-self: flex-start;
+  background: var(--seg-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.check-update:hover { background: var(--bg-color-hover); }
+.update-status { font-size: 11px; color: var(--text-secondary); }
+.update-available { color: var(--text-primary); font-weight: 600; }
+.update-actions { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.download-update {
+  -webkit-app-region: no-drag;
+  background: var(--accent-color);
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.download-update:disabled { opacity: 0.6; cursor: default; }
+.update-notes { color: var(--accent-color); cursor: pointer; }
+.update-hint { margin-top: 4px; line-height: 1.4; }
+.quit-now {
+  -webkit-app-region: no-drag;
+  align-self: flex-start;
+  margin-top: 6px;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+/* Gear "update available" dot */
+#settings-btn.has-update { position: relative; }
+#settings-btn.has-update::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #388bfd;
+}

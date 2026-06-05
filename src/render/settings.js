@@ -52,7 +52,11 @@ export function renderSettingsView(settings, version, onChange) {
           ${tabCheck('inbox', 'Inbox', settings.tabs.inbox)}
         </div>
       </div>
-      <div class="settings-about">Git Menu v${escapeHtml(version || '')}</div>
+      <div class="settings-about">
+        <span class="about-version">Git Menu v${escapeHtml(version || '')}</span>
+        <button class="check-update" type="button">Check for updates</button>
+        <div class="update-status"></div>
+      </div>
     </div>
   `;
 
@@ -79,6 +83,58 @@ export function renderSettingsView(settings, version, onChange) {
       emit(JSON.parse(JSON.stringify(current)));
     });
   });
+
+  const checkBtn = view.querySelector('.check-update');
+  const status = view.querySelector('.update-status');
+  if (checkBtn && status) {
+    checkBtn.addEventListener('click', async () => {
+      status.textContent = 'Checking…';
+      let res;
+      try {
+        res = await window.api.checkUpdate();
+      } catch {
+        res = null;
+      }
+      if (!res || !res.ok) {
+        status.textContent = "Couldn't check for updates.";
+        return;
+      }
+      const u = res.data;
+      if (!u.available) {
+        status.textContent = `You're up to date (v${u.current}).`;
+        return;
+      }
+      status.innerHTML = `
+        <div class="update-available">Update available: v${escapeHtml(u.version)}</div>
+        <div class="update-actions">
+          <button class="download-update" type="button">Download &amp; install</button>
+          <a class="update-notes" data-url="${escapeHtml(u.notesUrl)}">Release notes</a>
+        </div>`;
+      status.querySelector('.update-notes').addEventListener('click', (e) => {
+        window.api.openExternal(e.currentTarget.dataset.url);
+      });
+      status.querySelector('.download-update').addEventListener('click', async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = 'Downloading…';
+        let dl;
+        try {
+          dl = await window.api.downloadUpdate(u.tag);
+        } catch {
+          dl = null;
+        }
+        if (!dl || !dl.ok) {
+          status.innerHTML = '<div class="update-available">Download failed — open the Releases page instead.</div>';
+          return;
+        }
+        status.innerHTML = `
+          <div class="update-available">Installer opened.</div>
+          <div class="update-hint">Drag <strong>Git Menu</strong> to Applications (replacing the old one), then quit &amp; reopen.</div>
+          <button class="quit-now" type="button">Quit Git Menu</button>`;
+        status.querySelector('.quit-now').addEventListener('click', () => window.api.quitApp());
+      });
+    });
+  }
 }
 
 function toggleRow(key, title, sub, checked) {
