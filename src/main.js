@@ -2,7 +2,7 @@ import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 import { renderContributions, configureContributions } from './render/contributions.js';
-import { renderInbox } from './render/inbox.js';
+import { renderInbox, updateInboxBadge } from './render/inbox.js';
 import { renderSettingsView, openSettings } from './render/settings.js';
 import { setupKeyboardNav } from './render/keyboard.js';
 import { defaultSettings } from '../lib/settings.js';
@@ -78,6 +78,7 @@ async function onSettingsChange(next) {
     settings = next;
   }
   applySettings(settings, true);
+  updateBadges();
 }
 
 function setupEventListeners() {
@@ -125,6 +126,23 @@ function startAutoRefresh(minutes = 5) {
   }, minutes * 60000);
 }
 
+// Smart badge = review-requested PRs + unread inbox threads. Fetched every refresh
+// regardless of the active tab, so the menubar count and inbox tab badge are always live.
+async function updateBadges() {
+  try {
+    let reviewCount = 0;
+    let unread = 0;
+    const rev = await window.api.getReviewRequests();
+    if (rev && rev.ok) reviewCount = (rev.data || []).length;
+    const inbox = await window.api.getInbox();
+    if (inbox && inbox.ok) unread = (inbox.data || []).filter((n) => n.unread).length;
+    updateInboxBadge(unread);
+    window.api.updateTrayCount(settings.smartBadge ? reviewCount + unread : 0);
+  } catch (error) {
+    console.error('updateBadges failed:', error);
+  }
+}
+
 async function loadData(isSilent = false) {
   if (!isSilent) showLoading();
 
@@ -167,6 +185,8 @@ async function loadData(isSilent = false) {
     // Contributions are best-effort: never gate the list on them.
     const contribRes = await window.api.getContributions();
     renderContributions(contribRes && contribRes.ok ? contribRes.data : null);
+
+    updateBadges();
   } catch (error) {
     // IPC-level failure (handler threw) — treat as a generic data failure.
     console.error('loadData failed:', error);

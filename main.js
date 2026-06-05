@@ -1,4 +1,5 @@
-import { app, BrowserWindow, Tray, ipcMain, shell, nativeImage, globalShortcut } from 'electron';
+import { app, BrowserWindow, Tray, ipcMain, shell, nativeImage, globalShortcut, nativeTheme } from 'electron';
+import { renderTrayIcon } from './lib/render-icon.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -51,6 +52,22 @@ function applyMainSettings() {
     } catch (error) {
       console.error('Failed to register hotkey:', settings.hotkey, error);
     }
+  }
+}
+
+let trayTemplateIcon = null;
+let lastBadgeCount = 0;
+
+function updateTrayIcon(count) {
+  lastBadgeCount = count;
+  if (!tray) return;
+  if (count > 0) {
+    const buf = renderTrayIcon({ count, dark: nativeTheme.shouldUseDarkColors });
+    const img = nativeImage.createFromBuffer(buf, { scaleFactor: 2 });
+    img.setTemplateImage(false);
+    tray.setImage(img);
+  } else if (trayTemplateIcon) {
+    tray.setImage(trayTemplateIcon);
   }
 }
 
@@ -136,10 +153,14 @@ app.whenReady().then(() => {
   loadSettings();
 
   const iconPath = path.join(__dirname, 'iconTemplate.png');
-  const icon = nativeImage.createFromPath(iconPath);
+  trayTemplateIcon = nativeImage.createFromPath(iconPath);
+  trayTemplateIcon.setTemplateImage(true);
 
-  tray = new Tray(icon);
+  tray = new Tray(trayTemplateIcon);
   tray.setToolTip('Git Menu');
+
+  // Re-render the composite icon when the system theme flips (glyph color follows the menubar).
+  nativeTheme.on('updated', () => updateTrayIcon(lastBadgeCount));
 
   tray.on('right-click', toggleWindow);
   tray.on('double-click', toggleWindow);
@@ -280,11 +301,5 @@ ipcMain.on('hide-window', () => {
 });
 
 ipcMain.on('update-tray-count', (event, count) => {
-  if (tray) {
-    if (count > 0) {
-      tray.setTitle(count.toString());
-    } else {
-      tray.setTitle('');
-    }
-  }
+  updateTrayIcon(count);
 });
