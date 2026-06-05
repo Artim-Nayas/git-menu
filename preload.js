@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('api', {
   getReviewRequests: () => ipcRenderer.invoke('get-review-requests'),
   getContributions: () => ipcRenderer.invoke('get-contributions'),
   getContributedRepos: () => ipcRenderer.invoke('get-contributed-repos'),
+  getInbox: () => ipcRenderer.invoke('get-inbox'),
+  markRead: (id) => ipcRenderer.invoke('mark-read', id),
+  markAllRead: (ids) => ipcRenderer.invoke('mark-all-read', ids),
   openExternal: (url) => ipcRenderer.send('open-external', url),
   updateTrayCount: (count) => ipcRenderer.send('update-tray-count', count),
   quitApp: () => ipcRenderer.send('quit-app')

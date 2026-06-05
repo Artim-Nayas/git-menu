@@ -2,6 +2,7 @@ import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 import { renderContributions } from './render/contributions.js';
+import { renderInbox } from './render/inbox.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
@@ -29,7 +30,11 @@ function setupEventListeners() {
   const searchInput = document.getElementById('search-input');
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase();
-    renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
+    if (currentTab === 'inbox') {
+      renderInbox(null, searchQuery);
+    } else {
+      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
+    }
   });
 
   document.getElementById('quit-btn').addEventListener('click', () => {
@@ -56,27 +61,40 @@ async function loadData(isSilent = false) {
   if (!isSilent) showLoading();
 
   try {
-    // PRs are the primary call — its result gates auth/setup state.
-    const prRes = currentTab === 'review-requests'
-      ? await window.api.getReviewRequests()
-      : await window.api.getMyPRs();
+    if (currentTab === 'inbox') {
+      const inboxRes = await window.api.getInbox();
+      if (!inboxRes || !inboxRes.ok) {
+        handleDataFailure(inboxRes, isSilent);
+        return;
+      }
+      hideRefreshError();
+      hideSetup();
+      setListMode('inbox');
+      renderInbox(inboxRes.data || [], searchQuery);
+    } else {
+      // PRs are the primary call — its result gates auth/setup state.
+      const prRes = currentTab === 'review-requests'
+        ? await window.api.getReviewRequests()
+        : await window.api.getMyPRs();
 
-    if (!prRes || !prRes.ok) {
-      handleDataFailure(prRes, isSilent);
-      return;
+      if (!prRes || !prRes.ok) {
+        handleDataFailure(prRes, isSilent);
+        return;
+      }
+
+      hideRefreshError();
+      hideSetup();
+      setListMode('prs');
+      currentPRs = prRes.data || [];
+
+      // Contributed-to repos (best-effort, Mine tab only) so repos with no open PRs still show.
+      contributedRepos = [];
+      if (currentTab === 'my-prs') {
+        const cr = await window.api.getContributedRepos();
+        if (cr && cr.ok) contributedRepos = cr.data || [];
+      }
+      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
     }
-
-    hideRefreshError();
-    hideSetup();
-    currentPRs = prRes.data || [];
-
-    // Contributed-to repos (best-effort, Mine tab only) so repos with no open PRs still show.
-    contributedRepos = [];
-    if (currentTab === 'my-prs') {
-      const cr = await window.api.getContributedRepos();
-      if (cr && cr.ok) contributedRepos = cr.data || [];
-    }
-    renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
 
     // Contributions are best-effort: never gate the list on them.
     const contribRes = await window.api.getContributions();
@@ -100,17 +118,35 @@ function handleDataFailure(res, isSilent) {
   showRefreshError();
 }
 
+// Toggle which list is active: 'inbox' shows the inbox + hides the PR list/filter chips;
+// 'prs' does the reverse. Each renderer manages its own container's visibility from there.
+function setListMode(mode) {
+  const inbox = mode === 'inbox';
+  document.getElementById('filter-bar').classList.toggle('hidden', inbox);
+  if (inbox) {
+    document.getElementById('pr-list').classList.add('hidden');
+    document.getElementById('empty-state').classList.add('hidden');
+  } else {
+    document.getElementById('inbox-list').classList.add('hidden');
+    document.getElementById('inbox-empty').classList.add('hidden');
+  }
+}
+
 function showLoading() {
   hideSetup();
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('pr-list').classList.add('hidden');
   document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('inbox-list').classList.add('hidden');
+  document.getElementById('inbox-empty').classList.add('hidden');
 }
 
 function showEmptyState() {
   hideSetup();
   document.getElementById('loading').classList.add('hidden');
   document.getElementById('pr-list').classList.add('hidden');
+  document.getElementById('inbox-list').classList.add('hidden');
+  document.getElementById('inbox-empty').classList.add('hidden');
   document.getElementById('empty-state').classList.remove('hidden');
 }
 
