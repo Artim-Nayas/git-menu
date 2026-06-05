@@ -23,7 +23,17 @@ export function setupFilterChips() {
   });
 }
 
+// Reset the status filter to "all" (e.g. on tab switch) so it doesn't leak across views.
+export function resetFilter() {
+  activeFilter = 'all';
+  document
+    .querySelectorAll('.filter-chip')
+    .forEach((c) => c.classList.toggle('on', c.dataset.filter === 'all'));
+}
+
 // opts: { prs, searchQuery, currentTab, contributedRepos, showEmptyRepos }
+// lastOpts is refreshed by every loadData/search render; a chip-click re-render is
+// only valid between those events, which is the only time it fires.
 export function renderPRList(opts) {
   lastOpts = opts;
   const {

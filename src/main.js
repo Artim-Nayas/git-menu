@@ -1,6 +1,6 @@
 import './style.css';
 import { escapeHtml } from './lib/escape.js';
-import { renderPRList, setupFilterChips } from './render/prs.js';
+import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
@@ -20,6 +20,7 @@ function setupEventListeners() {
   radios.forEach(radio => {
     radio.addEventListener('change', (e) => {
       currentTab = e.target.value;
+      resetFilter();
       loadData();
     });
   });
