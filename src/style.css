@@ -604,3 +604,84 @@ body {
   cursor: pointer;
 }
 .pr-empty:hover { color: var(--text-secondary); }
+
+/* Contributions widget (ring + tallies + expandable heatmap) */
+.contrib-card { width: 100%; }
+.contrib-top { display: flex; align-items: center; gap: 12px; }
+.contrib-ring {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contrib-ring-inner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #1f242b; /* opaque hub so the conic ring reads as a donut, not a disc */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+@media (prefers-color-scheme: light) {
+  .contrib-ring-inner { background: #f6f8fa; }
+}
+.contrib-ring-inner .v { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.contrib-ring-inner .k { font-size: 8px; color: var(--text-muted); }
+.contrib-tallies { flex: 1; min-width: 0; }
+.tally { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); padding: 1px 0; }
+.tally-fire { color: #ff9f43; }
+
+.contrib-disclosure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+.contrib-toggle {
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+.contrib-toggle:hover { color: var(--text-primary); }
+.contrib-range {
+  -webkit-app-region: no-drag;
+  margin-left: auto;
+  font-size: 10px;
+  background: var(--seg-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 2px 4px;
+}
+
+.contrib-heatmap { margin-top: 8px; }
+.contrib-grid { display: flex; gap: 2px; overflow-x: auto; padding-bottom: 2px; }
+.contrib-grid::-webkit-scrollbar { height: 0; }
+.contrib-grid .contrib-column { gap: 2px; }
+.contrib-grid .contrib-block { width: 8px; height: 8px; }
+.contrib-months { display: flex; gap: 2px; height: 11px; margin-bottom: 2px; }
+.contrib-months span { width: 10px; font-size: 8px; color: var(--text-muted); white-space: nowrap; overflow: visible; }
+.contrib-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: flex-end;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.contrib-legend .contrib-block { width: 8px; height: 8px; }

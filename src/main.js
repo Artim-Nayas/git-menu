@@ -1,6 +1,7 @@
 import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
+import { renderContributions } from './render/contributions.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
@@ -97,57 +98,6 @@ function handleDataFailure(res, isSilent) {
     return;
   }
   showRefreshError();
-}
-
-function renderContributions(calendar) {
-  const container = document.getElementById('contributions-container');
-  if (!calendar) {
-    container.classList.add('hidden');
-    return;
-  }
-  container.classList.remove('hidden');
-  container.innerHTML = `
-    <div class="contributions-header">${calendar.totalContributions} contributions in the last year</div>
-    <div id="contributions-graph" class="contributions-graph"></div>
-  `;
-  
-  const graphContainer = document.getElementById('contributions-graph');
-
-  // Render the last 15 weeks
-  const weeks = calendar.weeks.slice(-15);
-  
-  // Calculate max contribution to scale the levels (or use absolute GitHub scale)
-  // GitHub roughly uses: 0, 1-3, 4-6, 7-9, 10+
-  function getLevel(count) {
-    if (count === 0) return 0;
-    if (count <= 3) return 1;
-    if (count <= 6) return 2;
-    if (count <= 9) return 3;
-    return 4;
-  }
-
-  weeks.forEach(week => {
-    const column = document.createElement('div');
-    column.className = 'contrib-column';
-    
-    // Fill empty days at the beginning if necessary (e.g., first week)
-    if (week.contributionDays.length < 7 && weeks.indexOf(week) === 0) {
-        const emptyDays = 7 - week.contributionDays.length;
-        for (let i=0; i<emptyDays; i++) {
-            const block = document.createElement('div');
-            block.className = 'contrib-block empty';
-            column.appendChild(block);
-        }
-    }
-
-    week.contributionDays.forEach(day => {
-      const block = document.createElement('div');
-      block.className = `contrib-block level-${getLevel(day.contributionCount)}`;
-      block.title = `${day.contributionCount} contributions on ${day.date}`;
-      column.appendChild(block);
-    });
-    graphContainer.appendChild(column);
-  });
 }
 
 function showLoading() {
