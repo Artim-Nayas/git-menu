@@ -1,5 +1,6 @@
 import { computeStats } from '../lib/stats.js';
 import { contributionLevel } from '../lib/levels.js';
+import { escapeHtml } from '../lib/escape.js';
 
 const RANGE_WEEKS = { '3m': 13, '6m': 26, '1y': 53 };
 
@@ -72,7 +73,7 @@ function heatmapHtml(calendar) {
       const blocks = (week.contributionDays || [])
         .map((d) => {
           const lvl = contributionLevel(d.contributionCount);
-          return `<div class="contrib-block level-${lvl}" title="${d.contributionCount} on ${d.date}"></div>`;
+          return `<div class="contrib-block level-${lvl}" title="${d.contributionCount} on ${escapeHtml(d.date)}"></div>`;
         })
         .join('');
       return `<div class="contrib-column">${blocks}</div>`;

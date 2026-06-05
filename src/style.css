@@ -685,3 +685,8 @@ body {
   margin-top: 6px;
 }
 .contrib-legend .contrib-block { width: 8px; height: 8px; }
+
+/* Disclosure chevron: right when collapsed, down when expanded (scoped so it
+   overrides the global .chevron rotation used by the org/repo accordions). */
+.contrib-toggle .chevron { transform: rotate(-90deg); transition: transform 0.2s ease; }
+.contrib-toggle .chevron.open { transform: rotate(0deg); }
