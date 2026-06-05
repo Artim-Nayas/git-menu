@@ -137,6 +137,28 @@ client-side filter over the already-fetched list (combines with search text):
 - Draft → `isDraft`
 Selected chip persists per-session (not saved).
 
+### 5.2 Org / repo header actions (Phase 3)
+Each **org** and **repo** accordion header gets a **clickable "open on GitHub" icon**
+(appears on hover, `-webkit-app-region: no-drag`) that opens the org/repo page in the
+browser via `openExternal` — without toggling the accordion (`stopPropagation`):
+- Org header icon → `https://github.com/<org>`
+- Repo header icon → `https://github.com/<org>/<repo>`
+
+### 5.3 Show all contributed-to repos, even with no open PRs (Phase 3)
+The list is no longer limited to repos that currently have open PRs. On the **Mine** tab it
+also surfaces every repo the user has recently contributed to:
+- New best-effort query `get-contributed-repos` →
+  `viewer.repositoriesContributedTo(first: 100, contributionTypes: [COMMIT, PULL_REQUEST, PULL_REQUEST_REVIEW], includeUserRepositories: true)` returning `{nameWithOwner}`.
+- Merge these into the Org → Repo grouping. Repos with open PRs render their PRs as today;
+  repos with **none** render an empty repo row with a muted **"No open PRs"** placeholder and
+  the repo-visit icon from §5.2.
+- To avoid a heavy/long list, **empty repos default to collapsed** and sort **below** repos
+  that have open PRs within each org. The whole "include empty repos" behavior is gated by a
+  Settings toggle (**Show all contributed repos**, default on) added to the §8.1 schema as
+  `"showEmptyRepos": true`.
+- This is best-effort: if `get-contributed-repos` fails, fall back to the PR-only list
+  (never block rendering).
+
 ## 6. Inbox tab
 
 Third segmented tab **Inbox** with an unread count badge. Data = `get-inbox`
@@ -195,6 +217,7 @@ JSON file at `app.getPath('userData')/settings.json`. Schema:
   "smartBadge": true,
   "refreshMinutes": 5,
   "hotkey": "Alt+G",
+  "showEmptyRepos": true,
   "tabs": { "mine": true, "reviews": true, "inbox": true },
   "contrib": { "expanded": false, "range": "6m" }
 }
