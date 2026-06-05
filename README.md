@@ -52,7 +52,8 @@ Issues and PRs welcome. This is an open-source MIT project — see [LICENSE](LIC
 Releases are built and published automatically by GitHub Actions on any `v*` tag.
 
 ```bash
-npm run release          # bumps the patch version, tags, and pushes the tag
+git checkout main && git pull   # release from a clean, up-to-date main
+npm run release                 # bumps the patch version, tags, and pushes the tag
 # or, for a minor/major bump:
 npm version minor && git push --follow-tags
 ```
