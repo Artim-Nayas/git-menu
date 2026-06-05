@@ -4,6 +4,7 @@ import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 import { renderContributions, configureContributions } from './render/contributions.js';
 import { renderInbox } from './render/inbox.js';
 import { renderSettingsView, openSettings } from './render/settings.js';
+import { setupKeyboardNav } from './render/keyboard.js';
 import { defaultSettings } from '../lib/settings.js';
 
 let currentTab = 'my-prs';
@@ -17,6 +18,7 @@ let appVersion = '';
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupFilterChips();
+  setupKeyboardNav();
   await initSettings();
   loadData();
 });

@@ -843,3 +843,10 @@ body {
 .switch:checked { background: var(--accent-color); }
 .switch:checked::after { left: 16px; }
 .settings-about { padding: 12px; font-size: 11px; color: var(--text-muted); }
+
+/* Keyboard-selected row */
+.pr-item.kb-selected,
+.inbox-item.kb-selected {
+  background: rgba(56, 139, 253, 0.16);
+  box-shadow: inset 2px 0 0 #388bfd;
+}
