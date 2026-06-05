@@ -26,9 +26,14 @@ CLI, so it uses your existing GitHub auth.
 2. Download the latest **`Git Menu-*.dmg`** from
    [Releases](https://github.com/Artim-Nayas/git-menu/releases).
 3. Open the DMG and drag **Git Menu** to Applications.
-4. **First launch:** the app is unsigned (free, no Apple Developer account), so
-   macOS Gatekeeper will warn you. **Right-click the app → Open** once to allow it.
-   After that it launches normally.
+4. **First launch:** the app is ad-hoc signed but not notarized (free, no Apple
+   Developer account), so macOS shows an "unidentified developer" prompt.
+   **Right-click the app → Open** once to allow it; after that it launches normally.
+   If macOS instead says the app is **"damaged"** (it can flag a quarantined
+   download), clear the quarantine flag once and reopen:
+   ```bash
+   xattr -dr com.apple.quarantine "/Applications/Git Menu.app"
+   ```
 
 The app lives in your menu bar (no Dock icon). Click the icon to see your PRs.
 

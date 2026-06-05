@@ -23,6 +23,7 @@
   "build": {
     "appId": "com.artimnayas.gitmenu",
     "productName": "Git Menu",
+    "afterPack": "scripts/ad-hoc-sign.cjs",
     "directories": {
       "output": "release"
     },
