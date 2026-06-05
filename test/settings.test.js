@@ -50,6 +50,13 @@ test('mergeSettings rejects out-of-set refresh/hotkey/range', () => {
   assert.equal(m.contrib.range, '6m');
 });
 
+test('mergeSettings forces Mine visible when all tabs are hidden', () => {
+  const m = mergeSettings({ tabs: { mine: false, reviews: false, inbox: false } });
+  assert.equal(m.tabs.mine, true);
+  assert.equal(m.tabs.reviews, false);
+  assert.equal(m.tabs.inbox, false);
+});
+
 test('SETTINGS_CHOICES exposes the allowed option lists', () => {
   assert.deepEqual(SETTINGS_CHOICES.refresh, [1, 5, 15, 30]);
   assert.deepEqual(SETTINGS_CHOICES.range, ['3m', '6m', '1y']);

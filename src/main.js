@@ -1,10 +1,9 @@
 import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
-import { renderContributions } from './render/contributions.js';
+import { renderContributions, configureContributions } from './render/contributions.js';
 import { renderInbox } from './render/inbox.js';
 import { renderSettingsView, openSettings } from './render/settings.js';
-import { configureContributions } from './render/contributions.js';
 import { defaultSettings } from '../lib/settings.js';
 
 let currentTab = 'my-prs';
