@@ -4,6 +4,12 @@ import { classifyGhFailure } from '../lib/gh-errors.js';
 
 test('ENOENT means gh is not installed', () => {
   assert.equal(classifyGhFailure({ code: 'ENOENT', stderr: '' }), 'no-gh');
+  // ENOENT takes precedence over any auth-ish text in stderr.
+  assert.equal(classifyGhFailure({ code: 'ENOENT', stderr: 'requires authentication' }), 'no-gh');
+});
+
+test('a generic server timeout is not misread as a network failure', () => {
+  assert.equal(classifyGhFailure({ code: 1, stderr: 'HTTP 504: Gateway Timeout' }), 'api');
 });
 
 test('auth phrasing means not signed in', () => {

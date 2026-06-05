@@ -144,6 +144,7 @@ query {
 ipcMain.handle('get-my-prs', async () => {
   const res = await runGH('gh', ['api', 'graphql', '-f', `query=${prQuery("is:pr is:open author:@me")}`]);
   if (!res.ok) return res;
+  // res.data = runGH's parsed JSON envelope; the inner .data is GraphQL's own root.
   return { ok: true, data: res.data?.data?.search?.nodes || [] };
 });
 
