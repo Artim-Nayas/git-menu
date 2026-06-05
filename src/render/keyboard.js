@@ -19,9 +19,13 @@ function visibleRows() {
 }
 
 function highlight(rows) {
-  rows.forEach((el, i) => el.classList.toggle('kb-selected', i === selectedIndex));
+  // Clear any stale highlight (e.g. on a row hidden by a re-render) before re-applying.
+  document.querySelectorAll('.kb-selected').forEach((el) => el.classList.remove('kb-selected'));
   const el = rows[selectedIndex];
-  if (el) el.scrollIntoView({ block: 'nearest' });
+  if (el) {
+    el.classList.add('kb-selected');
+    el.scrollIntoView({ block: 'nearest' });
+  }
 }
 
 function move(delta) {
@@ -73,7 +77,7 @@ function onKeyDown(e) {
       s.blur();
     } else {
       if (s) s.blur();
-      if (window.api.hideWindow) window.api.hideWindow();
+      if (window.api?.hideWindow) window.api.hideWindow();
     }
     return;
   }
@@ -116,12 +120,15 @@ function onKeyDown(e) {
       focusSearch();
       break;
     case '1':
+      e.preventDefault();
       selectTab(0);
       break;
     case '2':
+      e.preventDefault();
       selectTab(1);
       break;
     case '3':
+      e.preventDefault();
       selectTab(2);
       break;
     default:
