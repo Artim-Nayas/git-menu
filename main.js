@@ -321,7 +321,9 @@ ipcMain.handle('download-update', async (event, tag) => {
   }
   if (!dmg) return { ok: false, kind: 'api', message: 'DMG not found after download' };
   const dmgPath = path.join(dir, dmg);
-  await shell.openPath(dmgPath);
+  // shell.openPath resolves to '' on success or an error string on failure.
+  const openError = await shell.openPath(dmgPath);
+  if (openError) return { ok: false, kind: 'api', message: openError };
   return { ok: true, data: { path: dmgPath } };
 });
 
