@@ -4,15 +4,26 @@ import { escapeHtml } from '../lib/escape.js';
 
 const RANGE_WEEKS = { '3m': 13, '6m': 26, '1y': 53 };
 
-// View state (persisted to settings in a later phase).
+// View state (persisted via settings — see configureContributions).
+let enabled = true;
 let expanded = false;
 let range = '6m';
 let lastCalendar = null;
+let onChange = null;
+
+// Configure persisted state + a change callback. Re-renders if data is present.
+export function configureContributions(opts = {}) {
+  if (opts.enabled != null) enabled = opts.enabled;
+  if (opts.expanded != null) expanded = opts.expanded;
+  if (opts.range != null) range = opts.range;
+  if (opts.onChange) onChange = opts.onChange;
+  if (lastCalendar != null) renderContributions(lastCalendar);
+}
 
 export function renderContributions(calendar) {
   lastCalendar = calendar;
   const container = document.getElementById('contributions-container');
-  if (!calendar) {
+  if (!enabled || !calendar) {
     container.classList.add('hidden');
     return;
   }
@@ -55,11 +66,13 @@ export function renderContributions(calendar) {
 
   container.querySelector('.contrib-toggle').addEventListener('click', () => {
     expanded = !expanded;
+    if (onChange) onChange({ expanded, range });
     renderContributions(lastCalendar);
   });
   container.querySelector('.contrib-range').addEventListener('change', (e) => {
     range = e.target.value;
     expanded = true; // changing the range implies you want to see it
+    if (onChange) onChange({ expanded, range });
     renderContributions(lastCalendar);
   });
 }
