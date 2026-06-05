@@ -8,6 +8,7 @@ import util from 'util';
 import { classifyGhFailure } from './lib/gh-errors.js';
 import { filterInbox, normalizeNotification } from './lib/notifications.js';
 import { defaultSettings, mergeSettings } from './lib/settings.js';
+import { isUpdateAvailable, parseLatestRelease } from './lib/updater-core.js';
 
 const execFilePromise = util.promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -287,6 +288,42 @@ ipcMain.handle('set-settings', (event, next) => {
 });
 
 ipcMain.handle('get-version', () => app.getVersion());
+
+ipcMain.handle('check-update', async () => {
+  const res = await runGH('gh', ['api', 'repos/Artim-Nayas/git-menu/releases/latest']);
+  if (!res.ok) return res;
+  const info = parseLatestRelease(res.data);
+  const current = app.getVersion();
+  return { ok: true, data: { ...info, current, available: isUpdateAvailable(current, info.version) } };
+});
+
+ipcMain.handle('download-update', async (event, tag) => {
+  if (!tag) return { ok: false, kind: 'api', message: 'No release tag provided' };
+  const dir = path.join(app.getPath('temp'), 'git-menu-update');
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (error) {
+    return { ok: false, kind: 'api', message: String(error) };
+  }
+  const res = await runGH('gh', [
+    'release', 'download', tag,
+    '--repo', 'Artim-Nayas/git-menu',
+    '--pattern', '*.dmg',
+    '--dir', dir,
+    '--clobber',
+  ]);
+  if (!res.ok) return res;
+  let dmg;
+  try {
+    dmg = fs.readdirSync(dir).find((f) => f.toLowerCase().endsWith('.dmg'));
+  } catch {
+    dmg = null;
+  }
+  if (!dmg) return { ok: false, kind: 'api', message: 'DMG not found after download' };
+  const dmgPath = path.join(dir, dmg);
+  await shell.openPath(dmgPath);
+  return { ok: true, data: { path: dmgPath } };
+});
 
 ipcMain.on('open-external', (event, url) => {
   shell.openExternal(url);

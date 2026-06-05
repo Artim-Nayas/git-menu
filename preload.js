@@ -11,6 +11,8 @@ contextBridge.exposeInMainWorld('api', {
   getSettings: () => ipcRenderer.invoke('get-settings'),
   setSettings: (next) => ipcRenderer.invoke('set-settings', next),
   getVersion: () => ipcRenderer.invoke('get-version'),
+  checkUpdate: () => ipcRenderer.invoke('check-update'),
+  downloadUpdate: (tag) => ipcRenderer.invoke('download-update', tag),
   openExternal: (url) => ipcRenderer.send('open-external', url),
   updateTrayCount: (count) => ipcRenderer.send('update-tray-count', count),
   quitApp: () => ipcRenderer.send('quit-app'),
