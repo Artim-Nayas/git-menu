@@ -27,6 +27,14 @@ test('months', () => {
 test('years', () => {
   assert.equal(relativeTime(ago(400 * DAY), now), '1y ago');
 });
+test('44s is still "just now", 45s rolls to "1m ago"', () => {
+  assert.equal(relativeTime(ago(44 * SEC), now), 'just now');
+  assert.equal(relativeTime(ago(45 * SEC), now), '1m ago');
+});
+test('future timestamps and null are tolerated', () => {
+  assert.equal(relativeTime(new Date(now.getTime() + 5 * HR), now), 'just now');
+  assert.equal(relativeTime(null, now), '');
+});
 test('accepts an ISO string and bad input is empty', () => {
   assert.equal(relativeTime(ago(5 * MIN).toISOString(), now), '5m ago');
   assert.equal(relativeTime('not-a-date', now), '');

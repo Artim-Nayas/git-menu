@@ -16,3 +16,6 @@ test('accepts a leading # and bad input defaults to white', () => {
   assert.equal(labelTextColor(''), '#ffffff');
   assert.equal(labelTextColor('xyz'), '#ffffff');
 });
+test('partial-hex (parseInt would not reject) defaults to white', () => {
+  assert.equal(labelTextColor('12345g'), '#ffffff');
+});

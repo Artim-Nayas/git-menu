@@ -3,7 +3,8 @@
 // white text on unparseable input.
 export function labelTextColor(hex) {
   const clean = String(hex || '').replace('#', '');
-  if (clean.length !== 6) return '#ffffff';
+  // Require exactly 6 hex digits — guards length AND partial-parse (e.g. '12345g').
+  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return '#ffffff';
   const r = parseInt(clean.slice(0, 2), 16);
   const g = parseInt(clean.slice(2, 4), 16);
   const b = parseInt(clean.slice(4, 6), 16);

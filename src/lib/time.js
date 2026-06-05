@@ -1,8 +1,10 @@
 // Compact relative time, e.g. "just now", "5m ago", "3h ago", "2d ago", "3w ago",
 // "2mo ago", "1y ago". `now` is injectable for testing. Returns '' on invalid input.
 export function relativeTime(input, now = new Date()) {
+  if (input == null) return '';
   const then = input instanceof Date ? input : new Date(input);
-  const ms = now.getTime() - then.getTime();
+  // Clamp future timestamps (clock skew / server-ahead createdAt) to 0 -> "just now".
+  const ms = Math.max(0, now.getTime() - then.getTime());
   if (Number.isNaN(ms)) return '';
 
   const sec = Math.round(ms / 1000);
