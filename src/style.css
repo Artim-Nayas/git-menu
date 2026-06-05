@@ -510,3 +510,97 @@ body {
   cursor: pointer;
 }
 .refresh-error-retry:hover { background: var(--bg-color-hover); }
+
+/* Filter chips */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-color);
+}
+.filter-chip {
+  -webkit-app-region: no-drag;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: none;
+  background: var(--seg-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.filter-chip:hover { color: var(--text-primary); }
+.filter-chip.on { background: var(--accent-color); color: #fff; }
+
+/* Avatars */
+.pr-avatar-wrap {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.pr-avatar, .pr-avatar-fallback {
+  position: absolute;
+  inset: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+.pr-avatar { object-fit: cover; z-index: 1; background: var(--seg-bg); }
+.pr-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--seg-bg);
+  text-transform: uppercase;
+}
+
+/* Diffstat */
+.pr-diff { font-variant-numeric: tabular-nums; }
+.pr-diff .add { color: var(--ci-success); }
+.pr-diff .del { color: var(--ci-failure); }
+
+/* Labels */
+.pr-label {
+  font-size: 9px;
+  line-height: 1.4;
+  padding: 0 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pr-label-draft { background: var(--draft-color) !important; color: #fff !important; }
+
+/* Header "open on GitHub" button */
+.header-visit {
+  -webkit-app-region: no-drag;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  margin-right: 4px;
+  border-radius: 4px;
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.org-header:hover .header-visit,
+.repo-header:hover .header-visit { opacity: 1; }
+.header-visit:hover { color: var(--text-primary); background: var(--bg-color-hover); }
+
+/* Empty (contributed, no open PR) repos */
+.repo-empty .repo-name { color: var(--text-muted); }
+.pr-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-style: italic;
+  cursor: pointer;
+}
+.pr-empty:hover { color: var(--text-secondary); }
