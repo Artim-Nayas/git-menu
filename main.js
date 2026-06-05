@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import util from 'util';
+import { classifyGhFailure } from './lib/gh-errors.js';
 
 const execFilePromise = util.promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -16,13 +17,18 @@ const isDev = process.env.NODE_ENV === 'development';
 // Setup environment to ensure gh can be found when packaged
 const ghEnv = { ...process.env, PATH: `${process.env.PATH}:/opt/homebrew/bin:/usr/local/bin` };
 
+// Returns { ok: true, data } on success, or { ok: false, kind, message } on failure.
 async function runGH(command, args) {
   try {
     const { stdout } = await execFilePromise(command, args, { env: ghEnv });
-    return JSON.parse(stdout);
+    return { ok: true, data: JSON.parse(stdout) };
   } catch (error) {
-    console.error('Error running gh command:', error);
-    return null;
+    const kind = classifyGhFailure({
+      code: error.code,
+      stderr: `${error.stderr || ''}\n${error.message || ''}`,
+    });
+    console.error(`gh command failed (${kind}):`, error.message);
+    return { ok: false, kind, message: String(error.stderr || error.message || '') };
   }
 }
 
@@ -124,8 +130,11 @@ query {
         isDraft
         repository { nameWithOwner }
         createdAt
-        author { login }
+        author { login avatarUrl }
+        additions
+        deletions
         reviewDecision
+        labels(first: 3) { nodes { name color } }
         commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
       }
     }
@@ -133,13 +142,16 @@ query {
 }`;
 
 ipcMain.handle('get-my-prs', async () => {
-  const result = await runGH('gh', ['api', 'graphql', '-f', `query=${prQuery("is:pr is:open author:@me")}`]);
-  return result?.data?.search?.nodes || [];
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${prQuery("is:pr is:open author:@me")}`]);
+  if (!res.ok) return res;
+  // res.data = runGH's parsed JSON envelope; the inner .data is GraphQL's own root.
+  return { ok: true, data: res.data?.data?.search?.nodes || [] };
 });
 
 ipcMain.handle('get-review-requests', async () => {
-  const result = await runGH('gh', ['api', 'graphql', '-f', `query=${prQuery("is:pr is:open review-requested:@me")}`]);
-  return result?.data?.search?.nodes || [];
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${prQuery("is:pr is:open review-requested:@me")}`]);
+  if (!res.ok) return res;
+  return { ok: true, data: res.data?.data?.search?.nodes || [] };
 });
 
 ipcMain.handle('get-contributions', async () => {
@@ -160,8 +172,9 @@ ipcMain.handle('get-contributions', async () => {
       }
     }
   }`;
-  const result = await runGH('gh', ['api', 'graphql', '-f', `query=${contribQuery}`]);
-  return result?.data?.viewer?.contributionsCollection?.contributionCalendar || null;
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${contribQuery}`]);
+  if (!res.ok) return res;
+  return { ok: true, data: res.data?.data?.viewer?.contributionsCollection?.contributionCalendar || null };
 });
 
 ipcMain.on('open-external', (event, url) => {

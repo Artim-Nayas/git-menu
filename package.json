@@ -16,7 +16,8 @@
     "dev": "concurrently \"vite\" \"sleep 2 && cross-env NODE_ENV=development electron .\"",
     "build": "vite build && electron-builder",
     "pack": "vite build && electron-builder --dir",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test"
   },
   "build": {
     "appId": "com.artimnayas.gitmenu",
@@ -28,6 +29,7 @@
       "dist/**/*",
       "main.js",
       "preload.js",
+      "lib/**/*",
       "iconTemplate.png",
       "iconTemplate@2x.png",
       "package.json"

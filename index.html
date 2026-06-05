@@ -27,6 +27,11 @@
         <input type="text" id="search-input" class="search-input" placeholder="Search PRs, repos..." />
       </div>
 
+      <div id="refresh-error" class="refresh-error hidden">
+        <span>Couldn't refresh</span>
+        <button id="refresh-error-retry" class="refresh-error-retry">Retry</button>
+      </div>
+
       <div class="content">
         <div id="loading" class="loading hidden">
           <div class="spinner"></div>
@@ -40,6 +45,7 @@
           </svg>
           <span>No pull requests</span>
         </div>
+        <div id="setup" class="setup hidden"></div>
       </div>
       
       <footer class="footer">
