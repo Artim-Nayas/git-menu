@@ -27,13 +27,18 @@ CLI, so it uses your existing GitHub auth.
    [Releases](https://github.com/Artim-Nayas/git-menu/releases).
 3. Open the DMG and drag **Git Menu** to Applications.
 4. **First launch:** the app is ad-hoc signed but not notarized (free, no Apple
-   Developer account), so macOS shows an "unidentified developer" prompt.
-   **Right-click the app → Open** once to allow it; after that it launches normally.
-   If macOS instead says the app is **"damaged"** (it can flag a quarantined
-   download), clear the quarantine flag once and reopen:
+   Developer account), so macOS gates the first open. **Surest way** — clear the
+   download quarantine once, then open normally:
    ```bash
    xattr -dr com.apple.quarantine "/Applications/Git Menu.app"
    ```
+   **Or, without Terminal:**
+   - **macOS 15 (Sequoia) and newer:** double-click → on "Apple could not verify…"
+     click **Done**, then go to **System Settings → Privacy & Security**, scroll to
+     **Security**, and click **Open Anyway** next to Git Menu → authenticate → **Open Anyway**.
+   - **Older macOS:** **right-click the app → Open → Open**.
+
+   Do **not** click "Move to Bin" — the app is fine, just not Apple-notarized.
 
 The app lives in your menu bar (no Dock icon). Click the icon to see your PRs.
 
