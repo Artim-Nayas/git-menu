@@ -47,6 +47,20 @@ npm run build    # produce an unsigned DMG + ZIP in ./release
 
 Issues and PRs welcome. This is an open-source MIT project — see [LICENSE](LICENSE).
 
+## Releasing (maintainers)
+
+Releases are built and published automatically by GitHub Actions on any `v*` tag.
+
+```bash
+npm run release          # bumps the patch version, tags, and pushes the tag
+# or, for a minor/major bump:
+npm version minor && git push --follow-tags
+```
+
+The `Release` workflow builds the unsigned `.dmg` + `.zip` on a macOS runner and
+attaches them to a new GitHub Release for that tag. (The app is unsigned — see the
+first-launch note under Install.)
+
 ## License
 
 [MIT](LICENSE) © 2026 Artim-Nayas
