@@ -100,6 +100,7 @@ function createWindow() {
     height: 550,
     show: false,
     frame: false,
+    type: 'panel', // macOS NSPanel: shows on the active Space + focuses without activating the app
     fullscreenable: false,
     resizable: false,
     transparent: true,
@@ -112,11 +113,10 @@ function createWindow() {
     }
   });
 
-  // Show on whatever Space/desktop is active, floating above other windows.
-  // `skipTransformProcessType` stops the Dock-hidden app from flipping its activation
-  // policy on show — which otherwise yanks you to the Space the window is anchored to.
-  window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
-  window.setAlwaysOnTop(true, 'floating');
+  // The `panel` window type (above) is what keeps the popover on the active Space
+  // without switching desktops. canJoinAllSpaces makes the panel follow you to whatever
+  // Space is active, and show it over fullscreen apps too.
+  window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
   if (isDev) {
     window.loadURL('http://localhost:5173');
