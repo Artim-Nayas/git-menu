@@ -47,9 +47,6 @@ export function renderPRList(opts) {
   const prList = document.getElementById('pr-list');
   const emptyState = document.getElementById('empty-state');
 
-  // Tray count = unfiltered PR total (smart count comes in a later phase).
-  if (window.api.updateTrayCount) window.api.updateTrayCount(prs.length);
-
   const filtering = !!searchQuery || activeFilter !== 'all';
   const filtered = prs.filter(
     (pr) => matchesSearch(pr, searchQuery) && matchesStatusFilter(pr, activeFilter)
