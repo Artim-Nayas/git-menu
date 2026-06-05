@@ -46,6 +46,7 @@ export function renderPRList(opts) {
 
   const prList = document.getElementById('pr-list');
   const emptyState = document.getElementById('empty-state');
+  document.getElementById('loading').classList.add('hidden');
 
   const filtering = !!searchQuery || activeFilter !== 'all';
   const filtered = prs.filter(

@@ -18,6 +18,7 @@ export function renderInbox(items, searchQuery) {
 
   const list = document.getElementById('inbox-list');
   const empty = document.getElementById('inbox-empty');
+  document.getElementById('loading').classList.add('hidden');
 
   updateInboxBadge(lastItems.filter((n) => n.unread).length);
 
