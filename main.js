@@ -275,6 +275,10 @@ ipcMain.on('quit-app', () => {
   app.quit();
 });
 
+ipcMain.on('hide-window', () => {
+  if (window) window.hide();
+});
+
 ipcMain.on('update-tray-count', (event, count) => {
   if (tray) {
     if (count > 0) {

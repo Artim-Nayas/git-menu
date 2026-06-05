@@ -13,5 +13,6 @@ contextBridge.exposeInMainWorld('api', {
   getVersion: () => ipcRenderer.invoke('get-version'),
   openExternal: (url) => ipcRenderer.send('open-external', url),
   updateTrayCount: (count) => ipcRenderer.send('update-tray-count', count),
-  quitApp: () => ipcRenderer.send('quit-app')
+  quitApp: () => ipcRenderer.send('quit-app'),
+  hideWindow: () => ipcRenderer.send('hide-window')
 });
