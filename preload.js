@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld('api', {
   getInbox: () => ipcRenderer.invoke('get-inbox'),
   markRead: (id) => ipcRenderer.invoke('mark-read', id),
   markAllRead: (ids) => ipcRenderer.invoke('mark-all-read', ids),
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  setSettings: (next) => ipcRenderer.invoke('set-settings', next),
+  getVersion: () => ipcRenderer.invoke('get-version'),
   openExternal: (url) => ipcRenderer.send('open-external', url),
   updateTrayCount: (count) => ipcRenderer.send('update-tray-count', count),
   quitApp: () => ipcRenderer.send('quit-app')

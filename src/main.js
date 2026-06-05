@@ -1,21 +1,82 @@
 import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
-import { renderContributions } from './render/contributions.js';
+import { renderContributions, configureContributions } from './render/contributions.js';
 import { renderInbox } from './render/inbox.js';
+import { renderSettingsView, openSettings } from './render/settings.js';
+import { defaultSettings } from '../lib/settings.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
 let currentPRs = [];
 let contributedRepos = [];
 let searchQuery = '';
+let settings = defaultSettings();
+let appVersion = '';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupFilterChips();
+  await initSettings();
   loadData();
-  startAutoRefresh();
 });
+
+async function initSettings() {
+  try {
+    settings = (await window.api.getSettings()) || defaultSettings();
+    appVersion = await window.api.getVersion();
+  } catch (error) {
+    console.error('Failed to load settings:', error);
+    settings = defaultSettings();
+  }
+  applySettings(settings, false);
+}
+
+function applySettings(s, reload = true) {
+  startAutoRefresh(s.refreshMinutes);
+  configureContributions({
+    enabled: s.showContributions,
+    expanded: s.contrib.expanded,
+    range: s.contrib.range,
+    onChange: onContribChange,
+  });
+  applyTabVisibility(s.tabs, reload);
+}
+
+function onContribChange(c) {
+  settings.contrib = { ...settings.contrib, ...c };
+  window.api.setSettings(settings);
+}
+
+function applyTabVisibility(tabsCfg, reload) {
+  const entries = [
+    ['tab-my-prs', 'my-prs', tabsCfg.mine],
+    ['tab-review', 'review-requests', tabsCfg.reviews],
+    ['tab-inbox', 'inbox', tabsCfg.inbox],
+  ];
+  let firstVisible = null;
+  entries.forEach(([id, value, show]) => {
+    const label = document.querySelector(`label[for="${id}"]`);
+    if (label) label.style.display = show ? '' : 'none';
+    if (show && !firstVisible) firstVisible = { id, value };
+  });
+  const activeVisible = entries.some(([, value, show]) => show && value === currentTab);
+  if (!activeVisible && firstVisible) {
+    document.getElementById(firstVisible.id).checked = true;
+    currentTab = firstVisible.value;
+    if (reload) loadData();
+  }
+}
+
+async function onSettingsChange(next) {
+  try {
+    settings = (await window.api.setSettings(next)) || next;
+  } catch (error) {
+    console.error('Failed to save settings:', error);
+    settings = next;
+  }
+  applySettings(settings, true);
+}
 
 function setupEventListeners() {
   const radios = document.querySelectorAll('input[name="tab-group"]');
@@ -33,7 +94,7 @@ function setupEventListeners() {
     if (currentTab === 'inbox') {
       renderInbox(null, searchQuery);
     } else {
-      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
+      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: settings.showEmptyRepos });
     }
   });
 
@@ -45,16 +106,21 @@ function setupEventListeners() {
     loadData();
   });
 
+  document.getElementById('settings-btn').addEventListener('click', () => {
+    renderSettingsView(settings, appVersion, onSettingsChange);
+    openSettings();
+  });
+
   document.getElementById('refresh-error-retry').addEventListener('click', () => {
     loadData();
   });
 }
 
-function startAutoRefresh() {
+function startAutoRefresh(minutes = 5) {
   if (refreshInterval) clearInterval(refreshInterval);
   refreshInterval = setInterval(() => {
     loadData(true);
-  }, 300000);
+  }, minutes * 60000);
 }
 
 async function loadData(isSilent = false) {
@@ -93,7 +159,7 @@ async function loadData(isSilent = false) {
         const cr = await window.api.getContributedRepos();
         if (cr && cr.ok) contributedRepos = cr.data || [];
       }
-      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: true });
+      renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: settings.showEmptyRepos });
     }
 
     // Contributions are best-effort: never gate the list on them.

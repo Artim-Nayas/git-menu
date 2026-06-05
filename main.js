@@ -1,10 +1,12 @@
-import { app, BrowserWindow, Tray, ipcMain, shell, nativeImage } from 'electron';
+import { app, BrowserWindow, Tray, ipcMain, shell, nativeImage, globalShortcut } from 'electron';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { execFile } from 'child_process';
 import util from 'util';
 import { classifyGhFailure } from './lib/gh-errors.js';
 import { filterInbox, normalizeNotification } from './lib/notifications.js';
+import { defaultSettings, mergeSettings } from './lib/settings.js';
 
 const execFilePromise = util.promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +19,40 @@ const isDev = process.env.NODE_ENV === 'development';
 
 // Setup environment to ensure gh can be found when packaged
 const ghEnv = { ...process.env, PATH: `${process.env.PATH}:/opt/homebrew/bin:/usr/local/bin` };
+
+let settings = defaultSettings();
+
+function settingsPath() {
+  return path.join(app.getPath('userData'), 'settings.json');
+}
+
+function loadSettings() {
+  try {
+    settings = mergeSettings(JSON.parse(fs.readFileSync(settingsPath(), 'utf8')));
+  } catch {
+    settings = defaultSettings();
+  }
+}
+
+function saveSettings() {
+  try {
+    fs.writeFileSync(settingsPath(), JSON.stringify(settings, null, 2));
+  } catch (error) {
+    console.error('Failed to save settings:', error);
+  }
+}
+
+function applyMainSettings() {
+  app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin });
+  globalShortcut.unregisterAll();
+  if (settings.hotkey && settings.hotkey !== 'None') {
+    try {
+      globalShortcut.register(settings.hotkey, toggleWindow);
+    } catch (error) {
+      console.error('Failed to register hotkey:', settings.hotkey, error);
+    }
+  }
+}
 
 // Returns { ok: true, data } on success, or { ok: false, kind, message } on failure.
 async function runGH(command, args) {
@@ -97,12 +133,14 @@ const getWindowPosition = () => {
 }
 
 app.whenReady().then(() => {
+  loadSettings();
+
   const iconPath = path.join(__dirname, 'iconTemplate.png');
   const icon = nativeImage.createFromPath(iconPath);
-  
+
   tray = new Tray(icon);
   tray.setToolTip('Git Menu');
-  
+
   tray.on('right-click', toggleWindow);
   tray.on('double-click', toggleWindow);
   tray.on('click', function (event) {
@@ -110,6 +148,7 @@ app.whenReady().then(() => {
   });
 
   createWindow();
+  applyMainSettings();
 
   app.dock.hide(); // Hide from the dock as it's a menu bar app
 });
@@ -118,6 +157,10 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
 
 // IPC handlers
@@ -212,6 +255,17 @@ ipcMain.handle('mark-all-read', async (event, ids) => {
   }
   return { ok: true };
 });
+
+ipcMain.handle('get-settings', () => settings);
+
+ipcMain.handle('set-settings', (event, next) => {
+  settings = mergeSettings(next);
+  saveSettings();
+  applyMainSettings();
+  return settings;
+});
+
+ipcMain.handle('get-version', () => app.getVersion());
 
 ipcMain.on('open-external', (event, url) => {
   shell.openExternal(url);
