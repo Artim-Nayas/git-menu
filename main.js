@@ -112,7 +112,11 @@ function createWindow() {
     }
   });
 
-  window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  // Show on whatever Space/desktop is active, floating above other windows.
+  // `skipTransformProcessType` stops the Dock-hidden app from flipping its activation
+  // policy on show — which otherwise yanks you to the Space the window is anchored to.
+  window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
+  window.setAlwaysOnTop(true, 'floating');
 
   if (isDev) {
     window.loadURL('http://localhost:5173');
