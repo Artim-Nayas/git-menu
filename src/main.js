@@ -1,4 +1,5 @@
 import './style.css';
+import { escapeHtml } from './lib/escape.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
@@ -454,12 +455,3 @@ function hideRefreshError() {
   document.getElementById('refresh-error').classList.add('hidden');
 }
 
-function escapeHtml(unsafe) {
-  if (!unsafe) return '';
-  return String(unsafe)
-       .replace(/&/g, "&amp;")
-       .replace(/</g, "&lt;")
-       .replace(/>/g, "&gt;")
-       .replace(/"/g, "&quot;")
-       .replace(/'/g, "&#039;");
-}
