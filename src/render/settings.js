@@ -99,13 +99,13 @@ export function renderSettingsView(settings, version, onChange) {
         status.textContent = "Couldn't check for updates.";
         return;
       }
-      const u = res.data;
+      const u = res.data || {};
       if (!u.available) {
-        status.textContent = `You're up to date (v${u.current}).`;
+        status.textContent = `You're up to date (v${u.current || ''}).`;
         return;
       }
       status.innerHTML = `
-        <div class="update-available">Update available: v${escapeHtml(u.version)}</div>
+        <div class="update-available">Update available: v${escapeHtml(u.version || '')}</div>
         <div class="update-actions">
           <button class="download-update" type="button">Download &amp; install</button>
           <a class="update-notes" data-url="${escapeHtml(u.notesUrl)}">Release notes</a>

@@ -45,7 +45,11 @@ function saveSettings() {
 }
 
 function applyMainSettings() {
-  app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin });
+  // Skip in dev: macOS refuses to register a login item for the unsigned dev binary
+  // ("Operation not permitted"). It works for the packaged, installed app.
+  if (!isDev) {
+    app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin });
+  }
   globalShortcut.unregisterAll();
   if (settings.hotkey && settings.hotkey !== 'None') {
     try {
@@ -75,7 +79,9 @@ function updateTrayIcon(count) {
 // Returns { ok: true, data } on success, or { ok: false, kind, message } on failure.
 async function runGH(command, args) {
   try {
-    const { stdout } = await execFilePromise(command, args, { env: ghEnv });
+    // Large gh responses (e.g. notifications --paginate, the contributions calendar)
+    // can exceed execFile's 1 MB default and error with "maxBuffer length exceeded".
+    const { stdout } = await execFilePromise(command, args, { env: ghEnv, maxBuffer: 64 * 1024 * 1024 });
     // mark-read style endpoints return 205 with an empty body — treat as success/no data.
     return { ok: true, data: stdout && stdout.trim() ? JSON.parse(stdout) : null };
   } catch (error) {
