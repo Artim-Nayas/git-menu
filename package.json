@@ -1,0 +1,61 @@
+{
+  "name": "git-menu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A macOS menu-bar app for your GitHub pull requests, reviews, notifications, and contributions — powered by the gh CLI.",
+  "author": "Artim-Nayas",
+  "license": "MIT",
+  "homepage": "https://github.com/Artim-Nayas/git-menu",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Artim-Nayas/git-menu.git"
+  },
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"sleep 2 && cross-env NODE_ENV=development electron .\"",
+    "build": "vite build && electron-builder",
+    "pack": "vite build && electron-builder --dir",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.artimnayas.gitmenu",
+    "productName": "Git Menu",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "iconTemplate.png",
+      "iconTemplate@2x.png",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools",
+      "identity": null
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Artim-Nayas",
+        "repo": "git-menu"
+      }
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.8.1",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "canvas": "^3.2.3"
+  }
+}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval';" />
+    <title>Git Menu</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="header">
+        <div class="segmented-control">
+          <input type="radio" id="tab-my-prs" name="tab-group" value="my-prs" checked>
+          <label for="tab-my-prs">My PRs</label>
+          
+          <input type="radio" id="tab-review" name="tab-group" value="review-requests">
+          <label for="tab-review">Reviews</label>
+        </div>
+      </header>
+      
+      <div id="contributions-container" class="contributions-container">
+        <div id="contributions-graph" class="contributions-graph"></div>
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="search-input" class="search-input" placeholder="Search PRs, repos..." />
+      </div>
+
+      <div class="content">
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="pr-list" class="pr-list"></div>
+        <div id="empty-state" class="empty-state hidden">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-icon">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
+            <path d="M12 8V12"></path>
+            <path d="M12 16H12.01"></path>
+          </svg>
+          <span>No pull requests</span>
+        </div>
+      </div>
+      
+      <footer class="footer">
+        <button id="refresh-btn" class="icon-btn" title="Refresh">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+        </button>
+        <button id="quit-btn" class="icon-btn" title="Quit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+            <line x1="12" y1="2" x2="12" y2="12"></line>
+          </svg>
+        </button>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
