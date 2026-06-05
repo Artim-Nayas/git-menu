@@ -2,7 +2,7 @@ import './style.css';
 import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 import { renderContributions } from './render/contributions.js';
-import { renderInbox, updateInboxBadge } from './render/inbox.js';
+import { renderInbox } from './render/inbox.js';
 
 let currentTab = 'my-prs';
 let refreshInterval = null;
@@ -145,6 +145,8 @@ function showEmptyState() {
   hideSetup();
   document.getElementById('loading').classList.add('hidden');
   document.getElementById('pr-list').classList.add('hidden');
+  document.getElementById('inbox-list').classList.add('hidden');
+  document.getElementById('inbox-empty').classList.add('hidden');
   document.getElementById('empty-state').classList.remove('hidden');
 }
 

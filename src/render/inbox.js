@@ -84,7 +84,7 @@ function markAll() {
   const ids = lastItems.filter((n) => n.unread).map((n) => n.id).filter(Boolean);
   if (ids.length) window.api.markAllRead(ids);
   lastItems.forEach((n) => { n.unread = false; });
-  renderInbox(lastItems, lastSearch);
+  renderInbox(null, null); // reuse cached items/search; re-renders dots + badge
 }
 
 export function updateInboxBadge(count) {
