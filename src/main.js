@@ -356,12 +356,14 @@ function renderPRs(prs) {
 }
 
 function showLoading() {
+  hideSetup();
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('pr-list').classList.add('hidden');
   document.getElementById('empty-state').classList.add('hidden');
 }
 
 function showEmptyState() {
+  hideSetup();
   document.getElementById('loading').classList.add('hidden');
   document.getElementById('pr-list').classList.add('hidden');
   document.getElementById('empty-state').classList.remove('hidden');
