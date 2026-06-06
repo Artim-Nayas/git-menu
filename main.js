@@ -9,6 +9,7 @@ import { classifyGhFailure } from './lib/gh-errors.js';
 import { filterInbox, normalizeNotification } from './lib/notifications.js';
 import { defaultSettings, mergeSettings } from './lib/settings.js';
 import { isUpdateAvailable, parseLatestRelease } from './lib/updater-core.js';
+import { normalizeRun, normalizeJobs, normalizeChecks } from './lib/actions.js';
 
 const execFilePromise = util.promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
@@ -335,6 +336,57 @@ ipcMain.handle('download-update', async (event, tag) => {
   const openError = await shell.openPath(dmgPath);
   if (openError) return { ok: false, kind: 'api', message: openError };
   return { ok: true, data: { path: dmgPath } };
+});
+
+let cachedLogin = null;
+async function ghLogin() {
+  if (!cachedLogin) {
+    const r = await runGH('gh', ['api', 'user']);
+    cachedLogin = r.ok ? (r.data?.login || null) : null;
+  }
+  return cachedLogin;
+}
+
+ipcMain.handle('get-action-runs', async (event, repos) => {
+  const login = await ghLogin();
+  if (!login) return { ok: false, kind: 'no-auth', message: 'Could not resolve your GitHub login' };
+  const list = (repos || []).slice(0, 8);
+  const perRepo = await Promise.all(list.map(async (repo) => {
+    const res = await runGH('gh', ['api', `repos/${repo}/actions/runs?actor=${login}&per_page=5`]);
+    if (!res.ok) return [];
+    return (res.data?.workflow_runs || []).map((r) => normalizeRun(r, repo));
+  }));
+  const runs = perRepo.flat()
+    .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
+    .slice(0, 30);
+  return { ok: true, data: runs };
+});
+
+ipcMain.handle('get-run-jobs', async (event, { repo, runId } = {}) => {
+  if (!repo || !runId) return { ok: false, kind: 'api', message: 'Missing repo/runId' };
+  const res = await runGH('gh', ['api', `repos/${repo}/actions/runs/${runId}/jobs`]);
+  if (!res.ok) return res;
+  return { ok: true, data: normalizeJobs(res.data) };
+});
+
+ipcMain.handle('get-pr-checks', async (event, { repo, number } = {}) => {
+  if (!repo || !number) return { ok: false, kind: 'api', message: 'Missing repo/number' };
+  const [owner, name] = String(repo).split('/');
+  const q = `query {
+    repository(owner: "${owner}", name: "${name}") {
+      pullRequest(number: ${number}) {
+        commits(last: 1) { nodes { commit { statusCheckRollup { contexts(first: 50) { nodes {
+          __typename
+          ... on CheckRun { name status conclusion detailsUrl }
+          ... on StatusContext { context state targetUrl }
+        } } } } } }
+      }
+    }
+  }`;
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${q}`]);
+  if (!res.ok) return res;
+  const contexts = res.data?.data?.repository?.pullRequest?.commits?.nodes?.[0]?.commit?.statusCheckRollup?.contexts?.nodes || [];
+  return { ok: true, data: normalizeChecks(contexts) };
 });
 
 ipcMain.on('open-external', (event, url) => {
