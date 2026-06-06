@@ -11,7 +11,7 @@ test('defaultSettings has the documented shape', () => {
   assert.equal(d.refreshMinutes, 5);
   assert.equal(d.hotkey, 'Alt+G');
   assert.equal(d.showEmptyRepos, true);
-  assert.deepEqual(d.tabs, { mine: true, reviews: true, inbox: true });
+  assert.deepEqual(d.tabs, { mine: true, reviews: true, inbox: true, actions: true });
   assert.deepEqual(d.contrib, { expanded: false, range: '6m' });
 });
 
@@ -51,10 +51,11 @@ test('mergeSettings rejects out-of-set refresh/hotkey/range', () => {
 });
 
 test('mergeSettings forces Mine visible when all tabs are hidden', () => {
-  const m = mergeSettings({ tabs: { mine: false, reviews: false, inbox: false } });
+  const m = mergeSettings({ tabs: { mine: false, reviews: false, inbox: false, actions: false } });
   assert.equal(m.tabs.mine, true);
   assert.equal(m.tabs.reviews, false);
   assert.equal(m.tabs.inbox, false);
+  assert.equal(m.tabs.actions, false);
 });
 
 test('SETTINGS_CHOICES exposes the allowed option lists', () => {
