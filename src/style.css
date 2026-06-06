@@ -907,3 +907,39 @@ body {
   border-radius: 50%;
   background: #388bfd;
 }
+
+/* Status symbols (shared by Actions + PR checks) */
+.action-status { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; flex: 0 0 auto; width: 14px; }
+.st-success { color: var(--ci-success); }
+.st-failure { color: var(--ci-failure); }
+.st-running { color: var(--ci-pending); }
+.st-queued { color: var(--text-secondary); }
+.st-muted { color: var(--text-muted); }
+
+/* Actions list */
+.actions-list { display: flex; flex-direction: column; }
+.action-item { border-top: 1px solid var(--border-color); }
+.action-head { display: flex; gap: 8px; align-items: center; padding: 7px 12px; }
+.action-body { min-width: 0; flex: 1; }
+.action-title { font-size: 12px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.action-title:hover { text-decoration: underline; }
+.action-meta { display: flex; gap: 6px; align-items: center; font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+.action-meta span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.action-expand { -webkit-app-region: no-drag; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 11px; padding: 2px 4px; }
+.action-expand:hover { color: var(--text-primary); }
+.action-jobs { padding: 2px 12px 8px 34px; }
+.action-job { margin-top: 6px; }
+.action-job-head { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--text-primary); font-weight: 600; }
+.action-job-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.action-step { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--text-secondary); padding: 1px 0 1px 8px; }
+.action-step.is-running { color: var(--text-primary); }
+.action-step-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.action-note { font-size: 11px; color: var(--text-muted); padding: 4px 0; }
+
+/* Per-PR checks panel */
+.pr-checks { padding: 2px 12px 6px 42px; }
+.pr-check { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--text-secondary); padding: 1px 0; }
+.pr-check-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.pr-check-name:hover { color: var(--text-primary); text-decoration: underline; }
+.pr-checks-empty { font-size: 11px; color: var(--text-muted); padding: 2px 0; }
+.ci-status.ci-toggle { -webkit-app-region: no-drag; background: none; border: none; cursor: pointer; padding: 0; font: inherit; }

@@ -19,6 +19,9 @@
 
           <input type="radio" id="tab-inbox" name="tab-group" value="inbox">
           <label for="tab-inbox">Inbox <span id="inbox-badge" class="tab-badge hidden">0</span></label>
+
+          <input type="radio" id="tab-actions" name="tab-group" value="actions">
+          <label for="tab-actions">Actions</label>
         </div>
       </header>
       
@@ -63,6 +66,13 @@
             <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
           </svg>
           <span>Inbox zero</span>
+        </div>
+        <div id="actions-list" class="actions-list hidden"></div>
+        <div id="actions-empty" class="empty-state hidden">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="empty-icon">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>No recent actions</span>
         </div>
         <div id="setup" class="setup hidden"></div>
       </div>

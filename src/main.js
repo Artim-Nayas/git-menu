@@ -3,6 +3,7 @@ import { escapeHtml } from './lib/escape.js';
 import { renderPRList, setupFilterChips, resetFilter } from './render/prs.js';
 import { renderContributions, configureContributions } from './render/contributions.js';
 import { renderInbox, updateInboxBadge } from './render/inbox.js';
+import { renderActions } from './render/actions.js';
 import { renderSettingsView, openSettings } from './render/settings.js';
 import { setupKeyboardNav } from './render/keyboard.js';
 import { defaultSettings } from '../lib/settings.js';
@@ -56,6 +57,7 @@ function applyTabVisibility(tabsCfg, reload) {
     ['tab-my-prs', 'my-prs', tabsCfg.mine],
     ['tab-review', 'review-requests', tabsCfg.reviews],
     ['tab-inbox', 'inbox', tabsCfg.inbox],
+    ['tab-actions', 'actions', tabsCfg.actions],
   ];
   let firstVisible = null;
   entries.forEach(([id, value, show]) => {
@@ -97,6 +99,8 @@ function setupEventListeners() {
     searchQuery = e.target.value.toLowerCase();
     if (currentTab === 'inbox') {
       renderInbox(null, searchQuery);
+    } else if (currentTab === 'actions') {
+      renderActions(null, searchQuery);
     } else {
       renderPRList({ prs: currentPRs, searchQuery, currentTab, contributedRepos, showEmptyRepos: settings.showEmptyRepos });
     }
@@ -170,6 +174,19 @@ async function loadData(isSilent = false) {
       hideSetup();
       setListMode('inbox');
       renderInbox(inboxRes.data || [], searchQuery);
+    } else if (currentTab === 'actions') {
+      // Workflow runs for the repos you have open PRs in (lazy — only on this tab).
+      const prRes = await window.api.getMyPRs();
+      if (!prRes || !prRes.ok) {
+        handleDataFailure(prRes, isSilent);
+        return;
+      }
+      hideRefreshError();
+      hideSetup();
+      setListMode('actions');
+      const repos = [...new Set((prRes.data || []).map((p) => p.repository.nameWithOwner))].slice(0, 8);
+      const runsRes = await window.api.getActionRuns(repos);
+      renderActions(runsRes && runsRes.ok ? (runsRes.data || []) : [], searchQuery);
     } else {
       // Fetch the primary PR list and (on Mine) contributed repos in PARALLEL, so the
       // list paints after the slower of the two — not their sum. The PR result still
@@ -225,18 +242,19 @@ function handleDataFailure(res, isSilent) {
   showRefreshError();
 }
 
-// Toggle which list is active: 'inbox' shows the inbox + hides the PR list/filter chips;
-// 'prs' does the reverse. Each renderer manages its own container's visibility from there.
+const LIST_CONTAINERS = {
+  prs: ['pr-list', 'empty-state'],
+  inbox: ['inbox-list', 'inbox-empty'],
+  actions: ['actions-list', 'actions-empty'],
+};
+
+// Show the filter chips only on the PR list; hide every other mode's containers
+// (the active renderer shows its own).
 function setListMode(mode) {
-  const inbox = mode === 'inbox';
-  document.getElementById('filter-bar').classList.toggle('hidden', inbox);
-  if (inbox) {
-    document.getElementById('pr-list').classList.add('hidden');
-    document.getElementById('empty-state').classList.add('hidden');
-  } else {
-    document.getElementById('inbox-list').classList.add('hidden');
-    document.getElementById('inbox-empty').classList.add('hidden');
-  }
+  document.getElementById('filter-bar').classList.toggle('hidden', mode !== 'prs');
+  Object.entries(LIST_CONTAINERS).forEach(([m, ids]) => {
+    if (m !== mode) ids.forEach((id) => document.getElementById(id).classList.add('hidden'));
+  });
 }
 
 function showLoading() {
@@ -246,6 +264,8 @@ function showLoading() {
   document.getElementById('empty-state').classList.add('hidden');
   document.getElementById('inbox-list').classList.add('hidden');
   document.getElementById('inbox-empty').classList.add('hidden');
+  document.getElementById('actions-list').classList.add('hidden');
+  document.getElementById('actions-empty').classList.add('hidden');
 }
 
 function showEmptyState() {
@@ -254,6 +274,8 @@ function showEmptyState() {
   document.getElementById('pr-list').classList.add('hidden');
   document.getElementById('inbox-list').classList.add('hidden');
   document.getElementById('inbox-empty').classList.add('hidden');
+  document.getElementById('actions-list').classList.add('hidden');
+  document.getElementById('actions-empty').classList.add('hidden');
   document.getElementById('empty-state').classList.remove('hidden');
 }
 

@@ -50,6 +50,7 @@ export function renderSettingsView(settings, version, onChange) {
           ${tabCheck('mine', 'Mine', settings.tabs.mine)}
           ${tabCheck('reviews', 'Reviews', settings.tabs.reviews)}
           ${tabCheck('inbox', 'Inbox', settings.tabs.inbox)}
+          ${tabCheck('actions', 'Actions', settings.tabs.actions)}
         </div>
       </div>
       <div class="settings-about">
