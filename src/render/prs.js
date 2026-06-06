@@ -2,6 +2,7 @@ import { escapeHtml } from '../lib/escape.js';
 import { relativeTime } from '../lib/time.js';
 import { labelTextColor } from '../lib/labels.js';
 import { matchesSearch, matchesStatusFilter } from '../lib/filter.js';
+import { statusMeta } from '../lib/status.js';
 
 const GH = 'https://github.com';
 
@@ -207,9 +208,9 @@ function prRow(pr) {
 
   const ci = pr.commits?.nodes?.[0]?.commit?.statusCheckRollup?.state;
   let ciHtml = '';
-  if (ci === 'SUCCESS') ciHtml = `<span class="ci-status ci-success" title="Checks passed">●</span>`;
-  else if (ci === 'FAILURE' || ci === 'ERROR') ciHtml = `<span class="ci-status ci-failure" title="Checks failed">●</span>`;
-  else if (ci === 'PENDING') ciHtml = `<span class="ci-status ci-pending" title="Checks pending">●</span>`;
+  if (ci === 'SUCCESS') ciHtml = `<button class="ci-status ci-toggle ci-success" title="Checks passed — show details">●</button>`;
+  else if (ci === 'FAILURE' || ci === 'ERROR') ciHtml = `<button class="ci-status ci-toggle ci-failure" title="Checks failed — show details">●</button>`;
+  else if (ci === 'PENDING') ciHtml = `<button class="ci-status ci-toggle ci-pending" title="Checks pending — show details">●</button>`;
 
   let reviewHtml = '';
   if (pr.reviewDecision === 'APPROVED') reviewHtml = `<span class="review-badge review-approved" title="Approved">✅</span>`;
@@ -278,5 +279,45 @@ function prRow(pr) {
   });
 
   row.addEventListener('click', () => window.api.openExternal(pr.url));
-  return row;
+
+  // Expandable per-PR checks: clicking the CI dot toggles a details panel.
+  const wrap = document.createElement('div');
+  wrap.className = 'pr-row';
+  wrap.appendChild(row);
+  const checksPanel = document.createElement('div');
+  checksPanel.className = 'pr-checks hidden';
+  wrap.appendChild(checksPanel);
+
+  const ciToggle = row.querySelector('.ci-toggle');
+  if (ciToggle) {
+    ciToggle.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const nowOpen = !checksPanel.classList.toggle('hidden');
+      if (nowOpen && !checksPanel.dataset.loaded) {
+        checksPanel.innerHTML = '<div class="pr-checks-empty">Loading checks…</div>';
+        const res = await window.api
+          .getPrChecks(pr.repository.nameWithOwner, pr.number)
+          .catch(() => null);
+        const checks = res && res.ok ? res.data : null;
+        checksPanel.innerHTML = checks ? checksHtml(checks) : '<div class="pr-checks-empty">Couldn\'t load checks.</div>';
+        checksPanel.querySelectorAll('.pr-check-name[data-url]').forEach((el) => {
+          el.addEventListener('click', () => window.api.openExternal(el.dataset.url));
+        });
+        checksPanel.dataset.loaded = '1';
+      }
+    });
+  }
+
+  return wrap;
+}
+
+function checksHtml(checks) {
+  if (!checks.length) return '<div class="pr-checks-empty">No checks.</div>';
+  return checks
+    .map((c) => {
+      const m = statusMeta(c.state);
+      const click = c.url ? ` data-url="${escapeHtml(c.url)}"` : '';
+      return `<div class="pr-check"><span class="action-status ${m.className}">${m.symbol}</span><span class="pr-check-name"${click}>${escapeHtml(c.name)}</span></div>`;
+    })
+    .join('');
 }
