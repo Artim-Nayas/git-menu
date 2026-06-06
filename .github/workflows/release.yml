@@ -35,7 +35,11 @@ jobs:
 
       # Auto-fill a "What's Changed" changelog from the commits since the last tag,
       # so every release is labelled (our commits are prefixed feat:/fix:/perf:/docs:).
+      # `gh release edit` has no --generate-notes; use the generate-notes API then set it.
       - name: Generate release notes
-        run: gh release edit "${GITHUB_REF_NAME}" --generate-notes
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            -f tag_name="${GITHUB_REF_NAME}" --jq '.body' > /tmp/notes.md
+          gh release edit "${GITHUB_REF_NAME}" --notes-file /tmp/notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
