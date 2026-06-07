@@ -18,6 +18,7 @@
     "pack": "vite build && electron-builder --dir",
     "preview": "vite preview",
     "test": "node --test",
+    "promo": "node scripts/build-promo.js",
     "release": "npm version patch && git push --follow-tags"
   },
   "build": {

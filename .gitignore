@@ -28,3 +28,6 @@ dist-ssr
 
 # electron-builder output
 release/
+
+# promo build scratch
+.promo-frames/

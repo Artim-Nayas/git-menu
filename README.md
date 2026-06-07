@@ -21,10 +21,12 @@ existing GitHub auth.
 
 ## Preview
 
-<p align="center"><img src="docs/preview.svg" alt="Git Menu popover" width="380"></p>
+<p align="center"><img src="docs/demo.gif" alt="Git Menu — switching between the Mine, Reviews, Inbox and Actions tabs" width="380"></p>
 
-> Representative render of the popover. The status dot on each row shows CI state
-> at a glance — 🟢 passing, 🟡 running, 🔴 failing — across your PRs and Actions runs.
+> The status dot on each row shows CI state at a glance — 🟢 passing, 🟡 running,
+> 🔴 failing — across your PRs and Actions runs.
+>
+> <sub>All four tabs, side by side: <a href="docs/tour.png">docs/tour.png</a>. (Renders built from the live UI via <code>npm run promo</code>.)</sub>
 
 ## Install
 
