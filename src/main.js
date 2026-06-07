@@ -273,6 +273,11 @@ function setListMode(mode) {
 
 function showLoading() {
   hideSetup();
+  // Reflect the target tab's filter-bar state immediately — otherwise the
+  // previous tab's chips linger over the spinner until setListMode runs
+  // after the fetch. Filter chips belong to the PR-list tabs only.
+  const isPrTab = currentTab === 'my-prs' || currentTab === 'review-requests';
+  document.getElementById('filter-bar').classList.toggle('hidden', !isPrTab);
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('pr-list').classList.add('hidden');
   document.getElementById('empty-state').classList.add('hidden');

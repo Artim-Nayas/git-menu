@@ -312,6 +312,10 @@ ipcMain.handle('download-update', async (event, tag) => {
   if (!tag) return { ok: false, kind: 'api', message: 'No release tag provided' };
   const dir = path.join(app.getPath('temp'), 'git-menu-update');
   try {
+    // Wipe stale DMGs from earlier updates first. --clobber only overwrites a
+    // same-named file, so without this the dir accumulates installers and the
+    // readdir().find() below can grab an OLDER version's DMG.
+    fs.rmSync(dir, { recursive: true, force: true });
     fs.mkdirSync(dir, { recursive: true });
   } catch (error) {
     return { ok: false, kind: 'api', message: String(error) };
