@@ -255,6 +255,23 @@ ipcMain.handle('get-contributions', async () => {
   return { ok: true, data: res.data?.data?.viewer?.contributionsCollection?.contributionCalendar || null };
 });
 
+ipcMain.handle('get-my-repos', async () => {
+  // Repos you OWN, most-recently-pushed first. Needed by the Actions tab so
+  // personal repos (e.g. git-menu, released via tag push with no open PR) show —
+  // the contributed-repos list buries them behind frequently-pushed org repos.
+  const q = `
+  query {
+    viewer {
+      repositories(first: 20, ownerAffiliations: OWNER, orderBy: {field: PUSHED_AT, direction: DESC}) {
+        nodes { nameWithOwner }
+      }
+    }
+  }`;
+  const res = await runGH('gh', ['api', 'graphql', '-f', `query=${q}`]);
+  if (!res.ok) return res;
+  return { ok: true, data: res.data?.data?.viewer?.repositories?.nodes || [] };
+});
+
 ipcMain.handle('get-contributed-repos', async () => {
   const q = `
   query {
@@ -354,7 +371,7 @@ async function ghLogin() {
 ipcMain.handle('get-action-runs', async (event, repos) => {
   const login = await ghLogin();
   if (!login) return { ok: false, kind: 'no-auth', message: 'Could not resolve your GitHub login' };
-  const list = (repos || []).slice(0, 8);
+  const list = (repos || []).slice(0, 12);
   const perRepo = await Promise.all(list.map(async (repo) => {
     const res = await runGH('gh', ['api', `repos/${repo}/actions/runs?actor=${login}&per_page=5`]);
     if (!res.ok) return [];

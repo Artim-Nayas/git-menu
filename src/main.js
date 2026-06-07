@@ -185,8 +185,15 @@ async function loadData(isSilent = false) {
       setListMode('inbox');
       renderInbox(inboxRes.data || [], searchQuery);
     } else if (currentTab === 'actions') {
-      // Workflow runs for the repos you have open PRs in (lazy — only on this tab).
-      const prRes = await window.api.getMyPRs();
+      // Workflow runs for repos you're active in (lazy — only on this tab). Source
+      // repos from your open PRs, your OWNED repos, and contributed repos — so repos
+      // released via tag push (e.g. git-menu) and personal repos with no open PR
+      // still show up, not just repos where you currently have a PR.
+      const [prRes, myRepoRes, crRes] = await Promise.all([
+        window.api.getMyPRs(),
+        window.api.getMyRepos(),
+        window.api.getContributedRepos(),
+      ]);
       if (stale()) return;
       if (!prRes || !prRes.ok) {
         handleDataFailure(prRes, isSilent);
@@ -195,7 +202,12 @@ async function loadData(isSilent = false) {
       hideRefreshError();
       hideSetup();
       setListMode('actions');
-      const repos = [...new Set((prRes.data || []).map((p) => p.repository.nameWithOwner))].slice(0, 8);
+      const prRepos = (prRes.data || []).map((p) => p.repository.nameWithOwner);
+      const ownedRepos = (myRepoRes && myRepoRes.ok ? myRepoRes.data || [] : []).map((r) => r.nameWithOwner);
+      const contribRepos = (crRes && crRes.ok ? crRes.data || [] : []).map((r) => r.nameWithOwner);
+      // Priority order: open-PR repos (most relevant) → your owned/personal repos
+      // (guaranteed slots so they aren't buried) → other contributed repos.
+      const repos = [...new Set([...prRepos, ...ownedRepos, ...contribRepos])].slice(0, 12);
       const runsRes = await window.api.getActionRuns(repos);
       if (stale()) return;
       renderActions(runsRes && runsRes.ok ? (runsRes.data || []) : [], searchQuery);
