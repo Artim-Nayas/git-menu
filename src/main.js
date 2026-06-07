@@ -160,12 +160,22 @@ async function updateBadges() {
   }
 }
 
+// Monotonic token for the in-flight load. Each loadData() bumps it; after every
+// await we check we're still the latest before touching the DOM. Without this, a
+// slow fetch (e.g. Actions' getMyPRs → getActionRuns) can resolve AFTER the user
+// switched tabs and clobber the newer tab's render — Actions data landing under
+// Reviews, etc.
+let loadSeq = 0;
+
 async function loadData(isSilent = false) {
+  const seq = ++loadSeq;
+  const stale = () => seq !== loadSeq;
   if (!isSilent) showLoading();
 
   try {
     if (currentTab === 'inbox') {
       const inboxRes = await window.api.getInbox();
+      if (stale()) return;
       if (!inboxRes || !inboxRes.ok) {
         handleDataFailure(inboxRes, isSilent);
         return;
@@ -177,6 +187,7 @@ async function loadData(isSilent = false) {
     } else if (currentTab === 'actions') {
       // Workflow runs for the repos you have open PRs in (lazy — only on this tab).
       const prRes = await window.api.getMyPRs();
+      if (stale()) return;
       if (!prRes || !prRes.ok) {
         handleDataFailure(prRes, isSilent);
         return;
@@ -186,6 +197,7 @@ async function loadData(isSilent = false) {
       setListMode('actions');
       const repos = [...new Set((prRes.data || []).map((p) => p.repository.nameWithOwner))].slice(0, 8);
       const runsRes = await window.api.getActionRuns(repos);
+      if (stale()) return;
       renderActions(runsRes && runsRes.ok ? (runsRes.data || []) : [], searchQuery);
     } else {
       // Fetch the primary PR list and (on Mine) contributed repos in PARALLEL, so the
@@ -196,6 +208,7 @@ async function loadData(isSilent = false) {
           ? [window.api.getReviewRequests()]
           : [window.api.getMyPRs(), window.api.getContributedRepos()]
       );
+      if (stale()) return;
 
       if (!prRes || !prRes.ok) {
         handleDataFailure(prRes, isSilent);
@@ -215,6 +228,7 @@ async function loadData(isSilent = false) {
     loadSecondary();
   } catch (error) {
     // IPC-level failure (handler threw) — treat as a generic data failure.
+    if (stale()) return;
     console.error('loadData failed:', error);
     handleDataFailure({ ok: false, kind: 'api' }, isSilent);
   }
