@@ -1,6 +1,6 @@
 {
   "name": "git-menu",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "A macOS menu-bar app for your GitHub pull requests, reviews, notifications, and contributions — powered by the gh CLI.",
   "author": "Artim-Nayas",
