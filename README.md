@@ -9,6 +9,8 @@
   <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="Platform: macOS">
 </p>
 
+<p align="center"><b><a href="https://artim-nayas.github.io/git-menu/">artim-nayas.github.io/git-menu</a></b></p>
+
 <p align="center">
 A lightweight macOS menu-bar app for your GitHub work — pull requests, review
 requests, a notifications inbox, GitHub Actions runs, and your contribution
