@@ -28,17 +28,29 @@ existing GitHub auth.
 >
 > <sub>All four tabs, side by side: <a href="docs/tour.png">docs/tour.png</a>. (Renders built from the live UI via <code>npm run promo</code>.)</sub>
 
-## Install
+First, install and authenticate the GitHub CLI (Git Menu rides its auth):
 
-1. Install and authenticate the GitHub CLI:
-   ```bash
-   brew install gh
-   gh auth login
-   ```
-2. Download the latest **`Git Menu-*.dmg`** from
+```bash
+brew install gh
+gh auth login
+```
+
+### Option A — Homebrew (recommended)
+
+```bash
+brew install --cask artim-nayas/tap/git-menu
+```
+
+The cask clears the download quarantine for you, so Git Menu opens on first
+launch with no Gatekeeper dance. Update later with
+`brew upgrade --cask git-menu`.
+
+### Option B — Download the DMG
+
+1. Download the latest **`Git Menu-*.dmg`** from
    [Releases](https://github.com/Artim-Nayas/git-menu/releases).
-3. Open the DMG and drag **Git Menu** to Applications.
-4. **First launch:** the app is ad-hoc signed but not notarized (free, no Apple
+2. Open the DMG and drag **Git Menu** to Applications.
+3. **First launch:** the app is ad-hoc signed but not notarized (free, no Apple
    Developer account), so macOS gates the first open. **Surest way** — clear the
    download quarantine once, then open normally:
    ```bash
@@ -94,6 +106,22 @@ npm version minor && git push --follow-tags
 The `Release` workflow builds the unsigned `.dmg` + `.zip` on a macOS runner and
 attaches them to a new GitHub Release for that tag. (The app is unsigned — see the
 first-launch note under Install.)
+
+After publishing, **set proper, human-written release notes** — the workflow's
+auto-generated commit list is only a fallback:
+
+```bash
+gh release edit vX.Y.Z --notes-file notes.md --latest
+```
+
+**Homebrew cask** lives in [`Artim-Nayas/homebrew-tap`](https://github.com/Artim-Nayas/homebrew-tap).
+The release workflow bumps it automatically (version + sha256) once a
+`HOMEBREW_TAP_TOKEN` repo secret is set — a fine-grained PAT with **Contents:
+read/write** on the `homebrew-tap` repo. Without the secret, that step is skipped
+and the cask can be bumped by hand.
+
+**Promo art** (`docs/demo.gif`, `docs/tour.png`, `docs/social-preview.png`) is
+regenerated from the live UI with `npm run promo`.
 
 ## License
 

@@ -43,3 +43,23 @@ jobs:
           gh release edit "${GITHUB_REF_NAME}" --notes-file /tmp/notes.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Bump the Homebrew cask in Artim-Nayas/homebrew-tap to this version + sha256.
+      # No-ops until a HOMEBREW_TAP_TOKEN secret (a PAT with `contents:write` on the
+      # tap repo) is added — see "Releasing" in the README.
+      - name: Bump Homebrew cask
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        if: ${{ env.TAP_TOKEN != '' }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DMG="Git-Menu-${VERSION}-arm64.dmg"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${DMG}"
+          SHA="$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')"
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/Artim-Nayas/homebrew-tap.git" tap
+          cd tap
+          sed -i '' -E "s|^  version \".*\"|  version \"${VERSION}\"|" Casks/git-menu.rb
+          sed -i '' -E "s|^  sha256 \".*\"|  sha256 \"${SHA}\"|" Casks/git-menu.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update git-menu to ${VERSION}" && git push
