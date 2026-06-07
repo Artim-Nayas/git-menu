@@ -10,6 +10,7 @@ export function renderActions(runs, searchQuery) {
   if (runs != null) lastRuns = runs;
   if (searchQuery != null) lastSearch = searchQuery;
 
+  document.getElementById('loading').classList.add('hidden');
   const list = document.getElementById('actions-list');
   const empty = document.getElementById('actions-empty');
   const q = lastSearch;
