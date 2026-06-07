@@ -1,20 +1,30 @@
-# Git Menu
+<p align="center"><img src="build/icon.png" alt="Git Menu" width="120"></p>
 
-[![Release](https://img.shields.io/github/v/release/Artim-Nayas/git-menu?sort=semver)](https://github.com/Artim-Nayas/git-menu/releases/latest)
-[![CI](https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml/badge.svg)](https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/github/license/Artim-Nayas/git-menu)](LICENSE)
-![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
+<h1 align="center">Git Menu</h1>
 
+<p align="center">
+  <a href="https://github.com/Artim-Nayas/git-menu/releases/latest"><img src="https://img.shields.io/github/v/release/Artim-Nayas/git-menu?sort=semver" alt="Release"></a>
+  <a href="https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml"><img src="https://github.com/Artim-Nayas/git-menu/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Artim-Nayas/git-menu" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="Platform: macOS">
+</p>
+
+<p align="center">
 A lightweight macOS menu-bar app for your GitHub work — pull requests, review
-requests, a notifications inbox, and your contribution activity — without
-leaving the menu bar. Powered entirely by the [`gh`](https://cli.github.com)
-CLI, so it uses your existing GitHub auth.
+requests, a notifications inbox, GitHub Actions runs, and your contribution
+activity — without leaving the menu bar. Powered entirely by the
+<a href="https://cli.github.com"><code>gh</code></a> CLI, so it uses your
+existing GitHub auth.
+</p>
 
 > Status: early. macOS (Apple Silicon) only for now.
 
-## Screenshot
+## Preview
 
-<p align="center"><img src="docs/screenshot.png" alt="Git Menu popover" width="380"></p>
+<p align="center"><img src="docs/preview.svg" alt="Git Menu popover" width="380"></p>
+
+> Representative render of the popover. The status dot on each row shows CI state
+> at a glance — 🟢 passing, 🟡 running, 🔴 failing — across your PRs and Actions runs.
 
 ## Install
 
@@ -46,6 +56,8 @@ The app lives in your menu bar (no Dock icon). Click the icon to see your PRs.
 
 - **Mine / Reviews / Inbox** tabs — your open PRs, PRs awaiting your review, and
   a smart notifications inbox (review requests, mentions, replies).
+- **Actions** tab — recent GitHub Actions runs across your repos, with
+  expandable per-run jobs and steps, plus per-PR check status.
 - **Contribution activity** — streak, today, and an expandable heatmap.
 - **At-a-glance status** — CI state, review decision, diffstat, labels.
 - **Menu-bar count** of items that actually need you.
